@@ -1,6 +1,6 @@
 ﻿namespace OpenEphys.ProbeInterface;
 
-public class ProbeGroup
+public abstract class ProbeGroup
 {
     public string? Specification { get; set; }
     public string? Version { get; set; }
