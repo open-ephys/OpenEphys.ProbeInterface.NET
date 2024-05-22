@@ -62,7 +62,7 @@ public abstract class ProbeGroup
 
     /// <summary>
     /// Returns device channel indices of all contacts in all probe. Device channel indices are guaranteed to be
-    /// unique, unless they are -1. A positi
+    /// unique, unless they are -1
     /// </summary>
     /// <returns></returns>
     public List<int> GetDeviceChannelIndices()
