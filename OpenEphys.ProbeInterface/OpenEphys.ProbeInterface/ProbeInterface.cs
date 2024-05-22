@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using Newtonsoft.Json;
 
 namespace OpenEphys.ProbeInterface;
 
@@ -146,6 +147,7 @@ public class Probe
 
     public Probe() { }
 
+    [JsonConstructor]
     public Probe(uint ndim, string si_units, ProbeAnnotations annotations, ContactAnnotations contact_annotations,
         float[][] contact_positions, float[][][] contact_plane_axes, string[] contact_shapes,
         ContactShapeParam[] contact_shape_params, float[][] probe_planar_contour, int[] device_channel_indices,
@@ -211,6 +213,7 @@ public struct ContactShapeParam
         Radius = float.NaN;
     }
 
+    [JsonConstructor]
     public ContactShapeParam(float radius)
     {
         Radius = radius;
@@ -228,6 +231,7 @@ public struct ProbeAnnotations
         Manufacturer = string.Empty;
     }
 
+    [JsonConstructor]
     public ProbeAnnotations(string name, string manufacturer)
     {
         Name = name;
@@ -244,6 +248,7 @@ public struct ContactAnnotations
         Contact_Annotations = new string[0];
     }
 
+    [JsonConstructor]
     public ContactAnnotations(string[] contact_annotations)
     {
         Contact_Annotations = contact_annotations;
