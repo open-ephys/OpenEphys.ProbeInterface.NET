@@ -1,3 +1,6 @@
+using System.Collections.Generic;
+using System.Linq;
+
 namespace OpenEphys.ProbeInterface;
 
 public abstract class ProbeGroup
@@ -41,26 +44,44 @@ public abstract class ProbeGroup
         }
     }
 
-    public string[] GetContactIds()
+    /// <summary>
+    /// Returns the contact IDs of all contacts in all probes. Note that these are not guaranteed to be unique values across probes.
+    /// </summary>
+    /// <returns>List of strings containing all contact IDs</returns>
+    public List<string> GetContactIds()
     {
-        string[] contactIds = new string[NumContacts];
-
-        var length = 0;
+        List<string> contactIds = new();
 
         foreach (var probe in Probes)
         {
-            probe.Contact_Ids.CopyTo(contactIds, length);
-            length += probe.NumContacts;
+            contactIds.AddRange(probe.Contact_Ids.ToList());
         }
 
         return contactIds;
+    }
+
+    /// <summary>
+    /// Returns device channel indices of all contacts in all probe. Device channel indices are guaranteed to be
+    /// unique, unless they are -1. A positi
+    /// </summary>
+    /// <returns></returns>
+    public List<int> GetDeviceChannelIndices()
+    {
+        List<int> deviceChannelIndices = new();
+
+        foreach (var probe in Probes)
+        {
+            deviceChannelIndices.AddRange(probe.Device_Channel_Indices.ToList());
+        }
+
+        return deviceChannelIndices;
     }
 
     private void ValidateContactIds()
     {
         int contactNum = 0;
 
-        for (int i = 0; i < Probes.Length; i++)
+        for (int i = 0; i < Probes?.Length; i++)
         {
             if (Probes[i].Contact_Ids == null)
             {
@@ -79,7 +100,7 @@ public abstract class ProbeGroup
 
     private void ValidateShankIds()
     {
-        for (int i = 0; i < Probes.Length; i++)
+        for (int i = 0; i < Probes?.Length; i++)
         {
             if (Probes[i].Shank_Ids == null)
             {
@@ -90,7 +111,7 @@ public abstract class ProbeGroup
 
     private void ValidateDeviceChannelIndices()
     {
-        for (int i = 0; i < Probes.Length; i++)
+        for (int i = 0; i < Probes?.Length; i++)
         {
             if (Probes[i].Device_Channel_Indices == null)
             {
