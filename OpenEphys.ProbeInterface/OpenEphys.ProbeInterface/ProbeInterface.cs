@@ -6,11 +6,11 @@ namespace OpenEphys.ProbeInterface;
 
 public abstract class ProbeGroup
 {
-    public string? Specification { get; set; }
-    public string? Version { get; set; }
-    public Probe[]? Probes { get; set; }
+    public string Specification { get; protected set; }
+    public string Version { get; protected set; }
+    public Probe[] Probes { get; protected set; }
 
-    public ProbeGroup() { }
+    protected ProbeGroup() { }
 
     public ProbeGroup(string specification, string version, Probe[] probes)
     {
@@ -132,18 +132,18 @@ public abstract class ProbeGroup
 
 public class Probe
 {
-    public uint? Ndim { get; set; }
-    public string? Si_Units { get; set; }
-    public ProbeAnnotations? Annotations { get; set; }
-    public ContactAnnotations? Contact_Annotations { get; set; }
-    public float[][]? Contact_Positions { get; set; }
-    public float[][][]? Contact_Plane_Axes { get; set; }
-    public string[]? Contact_Shapes { get; set; }
-    public ContactShapeParam[]? Contact_Shape_Params { get; set; }
-    public float[][]? Probe_Planar_Contour { get; set; }
-    public int[]? Device_Channel_Indices { get; set; }
-    public string[]? Contact_Ids { get; set; }
-    public string[]? Shank_Ids { get; set; }
+    public uint? Ndim { get; protected set; }
+    public string? Si_Units { get; protected set; }
+    public ProbeAnnotations? Annotations { get; protected set; }
+    public ContactAnnotations? Contact_Annotations { get; protected set; }
+    public float[][]? Contact_Positions { get; protected set; }
+    public float[][][]? Contact_Plane_Axes { get; protected set; }
+    public string[]? Contact_Shapes { get; protected set; }
+    public ContactShapeParam[]? Contact_Shape_Params { get; protected set; }
+    public float[][]? Probe_Planar_Contour { get; protected set; }
+    public int[]? Device_Channel_Indices { get; internal set; }
+    public string[]? Contact_Ids { get; internal set; }
+    public string[]? Shank_Ids { get; internal set; }
 
     public Probe() { }
 
@@ -184,13 +184,13 @@ public class Probe
 
 public struct Contact
 {
-    public float PosX { get; set; }
-    public float PosY { get; set; }
-    public string Shape { get; set; }
-    public ContactShapeParam ShapeParams { get; set; }
-    public int DeviceId { get; set; }
-    public string ContactId { get; set; }
-    public string ShankId { get; set; }
+    public float PosX { get; }
+    public float PosY { get; }
+    public string Shape { get; }
+    public ContactShapeParam ShapeParams { get; }
+    public int DeviceId { get; }
+    public string ContactId { get; }
+    public string ShankId { get; }
 
     public Contact(float posX, float posY, string shape, ContactShapeParam shapeParam, int device_id, string contact_id, string shank_id)
     {
@@ -204,9 +204,9 @@ public struct Contact
     }
 }
 
-public struct ContactShapeParam
+public class ContactShapeParam
 {
-    public float Radius { get; set; }
+    public float Radius { get; protected set; }
 
     public ContactShapeParam()
     {
@@ -220,10 +220,10 @@ public struct ContactShapeParam
     }
 }
 
-public struct ProbeAnnotations
+public class ProbeAnnotations
 {
-    public string Name { get; set; }
-    public string Manufacturer { get; set; }
+    public string Name { get; protected set; }
+    public string Manufacturer { get; protected set; }
 
     public ProbeAnnotations()
     {
@@ -239,9 +239,9 @@ public struct ProbeAnnotations
     }
 }
 
-public struct ContactAnnotations
+public class ContactAnnotations
 {
-    public string[] Contact_Annotations { get; set; }
+    public string[] Contact_Annotations { get; protected set; }
 
     public ContactAnnotations()
     {
