@@ -1,4 +1,4 @@
-﻿namespace OpenEphys.ProbeInterface;
+namespace OpenEphys.ProbeInterface;
 
 public abstract class ProbeGroup
 {
@@ -94,11 +94,11 @@ public abstract class ProbeGroup
         {
             if (Probes[i].Device_Channel_Indices == null)
             {
-                Probes[i].Device_Channel_Indices = new uint[Probes[i].Contact_Ids.Length];
+                Probes[i].Device_Channel_Indices = new int[Probes[i].Contact_Ids.Length];
 
                 for (int j = 0; j < Probes[i].Device_Channel_Indices.Length; j++)
                 {
-                    if (uint.TryParse(Probes[i].Contact_Ids[j], out uint result))
+                    if (int.TryParse(Probes[i].Contact_Ids[j], out int result))
                     {
                         Probes[i].Device_Channel_Indices[j] = result;
                     }
@@ -119,7 +119,7 @@ public class Probe
     public string[]? Contact_Shapes { get; set; }
     public ContactShapeParam[]? Contact_Shape_Params { get; set; }
     public float[][]? Probe_Planar_Contour { get; set; }
-    public uint[]? Device_Channel_Indices { get; set; }
+    public int[]? Device_Channel_Indices { get; set; }
     public string[]? Contact_Ids { get; set; }
     public string[]? Shank_Ids { get; set; }
 
@@ -127,7 +127,7 @@ public class Probe
 
     public Probe(uint ndim, string si_units, ProbeAnnotations annotations, ContactAnnotations contact_annotations,
         float[][] contact_positions, float[][][] contact_plane_axes, string[] contact_shapes,
-        ContactShapeParam[] contact_shape_params, float[][] probe_planar_contour, uint[] device_channel_indices,
+        ContactShapeParam[] contact_shape_params, float[][] probe_planar_contour, int[] device_channel_indices,
         string[] contact_ids, string[] shank_ids)
     {
         Ndim = ndim;
@@ -165,11 +165,11 @@ public struct Contact
     public float PosY { get; set; }
     public string Shape { get; set; }
     public ContactShapeParam ShapeParams { get; set; }
-    public uint DeviceId { get; set; }
+    public int DeviceId { get; set; }
     public string ContactId { get; set; }
     public string ShankId { get; set; }
 
-    public Contact(float posX, float posY, string shape, ContactShapeParam shapeParam, uint device_id, string contact_id, string shank_id)
+    public Contact(float posX, float posY, string shape, ContactShapeParam shapeParam, int device_id, string contact_id, string shank_id)
     {
         PosX = posX;
         PosY = posY;
