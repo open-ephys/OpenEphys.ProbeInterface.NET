@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using Newtonsoft.Json;
 
@@ -6,9 +6,40 @@ namespace OpenEphys.ProbeInterface;
 
 public abstract class ProbeGroup
 {
-    public string Specification { get; protected set; }
-    public string Version { get; protected set; }
-    public Probe[] Probes { get; protected set; }
+    private string _specification;
+    private string _version;
+    private IEnumerable<Probe> _probes;
+
+    /// <summary>
+    /// String defining the specification of the file. For Probe Interface files, this is expected to be "probeinterface"
+    /// </summary>
+    public string Specification
+    {
+        get { return _specification; }
+        protected set { _specification = value; }
+    }
+
+    /// <summary>
+    /// String defining which version of Probe Interface was used
+    /// </summary>
+    public string Version
+    {
+        get { return _version; }
+        protected set { _version = value; }
+    }
+
+    /// <summary>
+    /// IEnumerable of probes that are present. Each probe can contain multiple shanks, and each probe has a unique
+    /// contour that defines the physical representation of the probe. Contacts have several representations
+    /// for their channel number, specifically ContactIds (a string that is not guaranteed to be unique) and
+    /// DeviceChannelIds (guaranteed to be unique across all probes). DeviceChannelIds can also be set to -1
+    /// to indicate that the channel was not connected or recorded from.
+    /// </summary>
+    public IEnumerable<Probe> Probes
+    {
+        get { return _probes; }
+        protected set { _probes = value; }
+    }
 
     protected ProbeGroup() { }
 
@@ -16,7 +47,7 @@ public abstract class ProbeGroup
     {
         Specification = specification;
         Version = version;
-        Probes = probes;
+        Probes = probes.ToList();
 
         ValidateContactIds();
         ValidateShankIds();
@@ -49,13 +80,13 @@ public abstract class ProbeGroup
     /// Returns the contact IDs of all contacts in all probes. Note that these are not guaranteed to be unique values across probes.
     /// </summary>
     /// <returns>List of strings containing all contact IDs</returns>
-    public List<string> GetContactIds()
+    public IEnumerable<string> GetContactIds()
     {
         List<string> contactIds = new();
 
         foreach (var probe in Probes)
         {
-            contactIds.AddRange(probe.Contact_Ids.ToList());
+            contactIds.AddRange(probe.ContactIds.ToList());
         }
 
         return contactIds;
@@ -66,13 +97,13 @@ public abstract class ProbeGroup
     /// unique, unless they are -1
     /// </summary>
     /// <returns></returns>
-    public List<int> GetDeviceChannelIndices()
+    public IEnumerable<int> GetDeviceChannelIndices()
     {
         List<int> deviceChannelIndices = new();
 
         foreach (var probe in Probes)
         {
-            deviceChannelIndices.AddRange(probe.Device_Channel_Indices.ToList());
+            deviceChannelIndices.AddRange(probe.DeviceChannelIndices.ToList());
         }
 
         return deviceChannelIndices;
@@ -82,47 +113,47 @@ public abstract class ProbeGroup
     {
         int contactNum = 0;
 
-        for (int i = 0; i < Probes?.Length; i++)
+        for (int i = 0; i < Probes.Count(); i++)
         {
-            if (Probes[i].Contact_Ids == null)
+            if (Probes.ElementAt(i).ContactIds == null)
             {
-                Probes[i].Contact_Ids = new string[Probes[i].Contact_Positions.Length];
+                Probes.ElementAt(i).ContactIds = new string[Probes.ElementAt(i).ContactPositions.Length];
 
-                for (int j = 0; j < Probes[i].Contact_Ids.Length; j++)
+                for (int j = 0; j < Probes.ElementAt(i).ContactIds.Length; j++)
                 {
-                    Probes[i].Contact_Ids[j] = contactNum.ToString();
+                    Probes.ElementAt(i).ContactIds[j] = contactNum.ToString();
                     contactNum++;
                 }
             }
             else
-                contactNum += Probes[i].Contact_Ids.Length;
+                contactNum += Probes.ElementAt(i).ContactIds.Length;
         }
     }
 
     private void ValidateShankIds()
     {
-        for (int i = 0; i < Probes?.Length; i++)
+        for (int i = 0; i < Probes.Count(); i++)
         {
-            if (Probes[i].Shank_Ids == null)
+            if (Probes.ElementAt(i).ShankIds == null)
             {
-                Probes[i].Shank_Ids = new string[Probes[i].Contact_Positions.Length];
+                Probes.ElementAt(i).ShankIds = new string[Probes.ElementAt(i).ContactPositions.Length];
             }
         }
     }
 
     private void ValidateDeviceChannelIndices()
     {
-        for (int i = 0; i < Probes?.Length; i++)
+        for (int i = 0; i < Probes.Count(); i++)
         {
-            if (Probes[i].Device_Channel_Indices == null)
+            if (Probes.ElementAt(i).DeviceChannelIndices == null)
             {
-                Probes[i].Device_Channel_Indices = new int[Probes[i].Contact_Ids.Length];
+                Probes.ElementAt(i).DeviceChannelIndices = new int[Probes.ElementAt(i).ContactIds.Length];
 
-                for (int j = 0; j < Probes[i].Device_Channel_Indices.Length; j++)
+                for (int j = 0; j < Probes.ElementAt(i) .DeviceChannelIndices.Length; j++)
                 {
-                    if (int.TryParse(Probes[i].Contact_Ids[j], out int result))
+                    if (int.TryParse(Probes.ElementAt(i).ContactIds[j], out int result))
                     {
-                        Probes[i].Device_Channel_Indices[j] = result;
+                        Probes.ElementAt(i).DeviceChannelIndices[j] = result;
                     }
                 }
             }
@@ -132,18 +163,79 @@ public abstract class ProbeGroup
 
 public class Probe
 {
-    public uint? Ndim { get; protected set; }
-    public string? Si_Units { get; protected set; }
-    public ProbeAnnotations? Annotations { get; protected set; }
-    public ContactAnnotations? Contact_Annotations { get; protected set; }
-    public float[][]? Contact_Positions { get; protected set; }
-    public float[][][]? Contact_Plane_Axes { get; protected set; }
-    public string[]? Contact_Shapes { get; protected set; }
-    public ContactShapeParam[]? Contact_Shape_Params { get; protected set; }
-    public float[][]? Probe_Planar_Contour { get; protected set; }
-    public int[]? Device_Channel_Indices { get; internal set; }
-    public string[]? Contact_Ids { get; internal set; }
-    public string[]? Shank_Ids { get; internal set; }
+    private uint _numDimensions;
+    private string _siUnits;
+    private ProbeAnnotations _annotations;
+    private ContactAnnotations _contactAnnotations;
+    private float[][] _contactPositions;
+    private float[][][] _contactPlaneAxes;
+    private string[] _contactShapes;
+    private ContactShapeParam[] _contactShapeParams;
+    private float[][] _probePlanarContour;
+    private int[] _deviceChannelIndices;
+    private string[] _contactIds;
+    private string[] _shankIds;
+
+    public uint NumDimensions
+    {
+        get { return _numDimensions; }
+        protected set { _numDimensions = value; }
+    }
+    public string SiUnits
+    {
+        get { return _siUnits; }
+        protected set { _siUnits = value; }
+    }
+    public ProbeAnnotations Annotations
+    {
+        get { return _annotations; }
+        protected set { _annotations = value; }
+    }
+    public ContactAnnotations ContactAnnotations
+    {
+        get { return _contactAnnotations; }
+        protected set { _contactAnnotations = value; }
+    }
+    public float[][] ContactPositions
+    {
+        get { return _contactPositions; }
+        protected set { _contactPositions = value; }
+    }
+    public float[][][] ContactPlaneAxes
+    {
+        get { return _contactPlaneAxes; }
+        protected set { _contactPlaneAxes = value; }
+    }
+    public string[] ContactShapes
+    {
+        get { return _contactShapes; }
+        protected set { _contactShapes = value; }
+    }
+    public ContactShapeParam[] ContactShapeParams
+    {
+        get { return _contactShapeParams; }
+        protected set { _contactShapeParams = value; }
+    }
+    public float[][] ProbePlanarContour
+    {
+        get { return _probePlanarContour; }
+        protected set { _probePlanarContour = value; }
+    }
+    public int[] DeviceChannelIndices
+    {
+        get { return _deviceChannelIndices; }
+        internal set { _deviceChannelIndices = value; }
+    }
+    public string[] ContactIds
+    {
+        get { return _contactIds; }
+        internal set { _contactIds = value; }
+    }
+    public string[] ShankIds
+    {
+        get { return _shankIds; }
+        internal set { _shankIds = value; }
+    }
 
     public Probe() { }
 
@@ -153,18 +245,18 @@ public class Probe
         ContactShapeParam[] contact_shape_params, float[][] probe_planar_contour, int[] device_channel_indices,
         string[] contact_ids, string[] shank_ids)
     {
-        Ndim = ndim;
-        Si_Units = si_units;
+        NumDimensions = ndim;
+        SiUnits = si_units;
         Annotations = annotations;
-        Contact_Annotations = contact_annotations;
-        Contact_Positions = contact_positions;
-        Contact_Plane_Axes = contact_plane_axes;
-        Contact_Shapes = contact_shapes;
-        Contact_Shape_Params = contact_shape_params;
-        Probe_Planar_Contour = probe_planar_contour;
-        Device_Channel_Indices = device_channel_indices;
-        Contact_Ids = contact_ids;
-        Shank_Ids = shank_ids;
+        ContactAnnotations = contact_annotations;
+        ContactPositions = contact_positions;
+        ContactPlaneAxes = contact_plane_axes;
+        ContactShapes = contact_shapes;
+        ContactShapeParams = contact_shape_params;
+        ProbePlanarContour = probe_planar_contour;
+        DeviceChannelIndices = device_channel_indices;
+        ContactIds = contact_ids;
+        ShankIds = shank_ids;
     }
 
     /// <summary>
@@ -175,11 +267,11 @@ public class Probe
     /// <returns></returns>
     public Contact GetContact(int index)
     {
-        return new Contact(Contact_Positions[index][0], Contact_Positions[index][1], Contact_Shapes[index], Contact_Shape_Params[index],
-            Device_Channel_Indices[index], Contact_Ids[index], Shank_Ids[index]);
+        return new Contact(ContactPositions[index][0], ContactPositions[index][1], ContactShapes[index], ContactShapeParams[index],
+            DeviceChannelIndices[index], ContactIds[index], ShankIds[index]);
     }
 
-    public int NumContacts => Contact_Ids.Length;
+    public int NumContacts => ContactPositions.Length;
 }
 
 public struct Contact
@@ -210,7 +302,6 @@ public class ContactShapeParam
 
     public ContactShapeParam()
     {
-        Radius = float.NaN;
     }
 
     [JsonConstructor]
@@ -227,8 +318,6 @@ public class ProbeAnnotations
 
     public ProbeAnnotations()
     {
-        Name = string.Empty;
-        Manufacturer = string.Empty;
     }
 
     [JsonConstructor]
@@ -245,7 +334,6 @@ public class ContactAnnotations
 
     public ContactAnnotations()
     {
-        Contact_Annotations = new string[0];
     }
 
     [JsonConstructor]
