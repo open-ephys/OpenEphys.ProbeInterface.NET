@@ -1,9 +1,14 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Xml.Serialization;
+using System.Runtime.Serialization;
+using System.CodeDom.Compiler;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 
 namespace OpenEphys.ProbeInterface;
 
+[GeneratedCodeAttribute("Bonsai.Sgen", "0.3.0.0 (Newtonsoft.Json v13.0.0.0)")]
 public abstract class ProbeGroup
 {
     private string _specification;
@@ -13,19 +18,21 @@ public abstract class ProbeGroup
     /// <summary>
     /// String defining the specification of the file. For Probe Interface files, this is expected to be "probeinterface"
     /// </summary>
+    [JsonProperty("specification", Required = Required.Always)]
     public string Specification
     {
         get { return _specification; }
-        protected set { _specification = value; }
+        set { _specification = value; }
     }
 
     /// <summary>
     /// String defining which version of Probe Interface was used
     /// </summary>
+    [JsonProperty("version", Required = Required.Always)]
     public string Version
     {
         get { return _version; }
-        protected set { _version = value; }
+        set { _version = value; }
     }
 
     /// <summary>
@@ -35,30 +42,32 @@ public abstract class ProbeGroup
     /// DeviceChannelIds (guaranteed to be unique across all probes). DeviceChannelIds can also be set to -1
     /// to indicate that the channel was not connected or recorded from.
     /// </summary>
+    [XmlIgnore()]
+    [JsonProperty("probes", Required = Required.Always)]
     public IEnumerable<Probe> Probes
     {
         get { return _probes; }
-        protected set { _probes = value; }
+        set { _probes = value; }
     }
 
     protected ProbeGroup() { }
 
     public ProbeGroup(string specification, string version, Probe[] probes)
     {
-        Specification = specification;
-        Version = version;
-        Probes = probes.ToList();
+        _specification = specification;
+        _version = version;
+        _probes = probes.ToList();
 
         ValidateContactIds();
         ValidateShankIds();
         ValidateDeviceChannelIndices();
     }
 
-    public ProbeGroup(ProbeGroup probeGroup)
+    protected ProbeGroup(ProbeGroup probeGroup)
     {
-        Specification = probeGroup.Specification;
-        Version = probeGroup.Version;
-        Probes = probeGroup.Probes;
+        _specification = probeGroup._specification;
+        _version = probeGroup._version;
+        _probes = probeGroup._probes;
     }
 
     public int NumContacts
@@ -149,7 +158,7 @@ public abstract class ProbeGroup
             {
                 Probes.ElementAt(i).DeviceChannelIndices = new int[Probes.ElementAt(i).ContactIds.Length];
 
-                for (int j = 0; j < Probes.ElementAt(i) .DeviceChannelIndices.Length; j++)
+                for (int j = 0; j < Probes.ElementAt(i).DeviceChannelIndices.Length; j++)
                 {
                     if (int.TryParse(Probes.ElementAt(i).ContactIds[j], out int result))
                     {
@@ -161,76 +170,112 @@ public abstract class ProbeGroup
     }
 }
 
+[GeneratedCodeAttribute("Bonsai.Sgen", "0.3.0.0 (Newtonsoft.Json v13.0.0.0)")]
 public class Probe
 {
-    private uint _numDimensions;
-    private string _siUnits;
+    private ProbeNdim _numDimensions;
+    private ProbeSiUnits _siUnits;
     private ProbeAnnotations _annotations;
     private ContactAnnotations _contactAnnotations;
     private float[][] _contactPositions;
     private float[][][] _contactPlaneAxes;
-    private string[] _contactShapes;
+    private ContactShape[] _contactShapes;
     private ContactShapeParam[] _contactShapeParams;
     private float[][] _probePlanarContour;
     private int[] _deviceChannelIndices;
     private string[] _contactIds;
     private string[] _shankIds;
 
-    public uint NumDimensions
+    [XmlIgnore()]
+    [JsonProperty("ndim", Required = Required.Always)]
+    public ProbeNdim NumDimensions
     {
         get { return _numDimensions; }
         protected set { _numDimensions = value; }
     }
-    public string SiUnits
+
+    [XmlIgnore()]
+    [JsonProperty("si_units", Required = Required.Always)]
+    public ProbeSiUnits SiUnits
     {
         get { return _siUnits; }
         protected set { _siUnits = value; }
     }
+
+    [XmlIgnore()]
+    [JsonProperty("annotations", Required = Required.Always)]
     public ProbeAnnotations Annotations
     {
         get { return _annotations; }
         protected set { _annotations = value; }
     }
+
+    [XmlIgnore()]
+    [JsonProperty("contact_annotations")]
     public ContactAnnotations ContactAnnotations
     {
         get { return _contactAnnotations; }
         protected set { _contactAnnotations = value; }
     }
+
+    [XmlIgnore()]
+    [JsonProperty("contact_positions", Required = Required.Always)]
     public float[][] ContactPositions
     {
         get { return _contactPositions; }
         protected set { _contactPositions = value; }
     }
+
+    [XmlIgnore()]
+    [JsonProperty("contact_plane_axes")]
     public float[][][] ContactPlaneAxes
     {
         get { return _contactPlaneAxes; }
         protected set { _contactPlaneAxes = value; }
     }
-    public string[] ContactShapes
+
+    [XmlIgnore()]
+    [JsonProperty("contact_shapes", Required = Required.Always)]
+    public ContactShape[] ContactShapes
     {
         get { return _contactShapes; }
         protected set { _contactShapes = value; }
     }
+
+    [XmlIgnore()]
+    [JsonProperty("contact_shape_params", Required = Required.Always)]
     public ContactShapeParam[] ContactShapeParams
     {
         get { return _contactShapeParams; }
         protected set { _contactShapeParams = value; }
     }
+
+    [XmlIgnore()]
+    [JsonProperty("probe_planar_contour")]
     public float[][] ProbePlanarContour
     {
         get { return _probePlanarContour; }
         protected set { _probePlanarContour = value; }
     }
+
+    [XmlIgnore()]
+    [JsonProperty("device_channel_indices")]
     public int[] DeviceChannelIndices
     {
         get { return _deviceChannelIndices; }
         internal set { _deviceChannelIndices = value; }
     }
+
+    [XmlIgnore()]
+    [JsonProperty("contact_ids")]
     public string[] ContactIds
     {
         get { return _contactIds; }
         internal set { _contactIds = value; }
     }
+
+    [XmlIgnore()]
+    [JsonProperty("shank_ids")]
     public string[] ShankIds
     {
         get { return _shankIds; }
@@ -240,23 +285,39 @@ public class Probe
     public Probe() { }
 
     [JsonConstructor]
-    public Probe(uint ndim, string si_units, ProbeAnnotations annotations, ContactAnnotations contact_annotations,
-        float[][] contact_positions, float[][][] contact_plane_axes, string[] contact_shapes,
+    public Probe(ProbeNdim ndim, ProbeSiUnits si_units, ProbeAnnotations annotations, ContactAnnotations contact_annotations,
+        float[][] contact_positions, float[][][] contact_plane_axes, ContactShape[] contact_shapes,
         ContactShapeParam[] contact_shape_params, float[][] probe_planar_contour, int[] device_channel_indices,
         string[] contact_ids, string[] shank_ids)
     {
-        NumDimensions = ndim;
-        SiUnits = si_units;
-        Annotations = annotations;
-        ContactAnnotations = contact_annotations;
-        ContactPositions = contact_positions;
-        ContactPlaneAxes = contact_plane_axes;
-        ContactShapes = contact_shapes;
-        ContactShapeParams = contact_shape_params;
-        ProbePlanarContour = probe_planar_contour;
-        DeviceChannelIndices = device_channel_indices;
-        ContactIds = contact_ids;
-        ShankIds = shank_ids;
+        _numDimensions = ndim;
+        _siUnits = si_units;
+        _annotations = annotations;
+        _contactAnnotations = contact_annotations;
+        _contactPositions = contact_positions;
+        _contactPlaneAxes = contact_plane_axes;
+        _contactShapes = contact_shapes;
+        _contactShapeParams = contact_shape_params;
+        _probePlanarContour = probe_planar_contour;
+        _deviceChannelIndices = device_channel_indices;
+        _contactIds = contact_ids;
+        _shankIds = shank_ids;
+    }
+
+    protected Probe(Probe probe)
+    {
+        _numDimensions = probe._numDimensions;
+        _siUnits = probe._siUnits;
+        _annotations = probe._annotations;
+        _contactAnnotations = probe._contactAnnotations;
+        _contactPositions = probe._contactPositions;
+        _contactPlaneAxes = probe._contactPlaneAxes;
+        _contactShapes = probe._contactShapes;
+        _contactShapeParams = probe._contactShapeParams;
+        _probePlanarContour = probe._probePlanarContour;
+        _deviceChannelIndices = probe._deviceChannelIndices;
+        _contactIds = probe._contactIds;
+        _shankIds = probe._shankIds;
     }
 
     /// <summary>
@@ -274,17 +335,39 @@ public class Probe
     public int NumContacts => ContactPositions.Length;
 }
 
+[GeneratedCodeAttribute("Bonsai.Sgen", "0.3.0.0 (Newtonsoft.Json v13.0.0.0)")]
+public enum ProbeNdim
+{
+    [EnumMemberAttribute(Value = "2")]
+    _2 = 2,
+
+    [EnumMemberAttribute(Value = "3")]
+    _3 = 3,
+}
+
+[GeneratedCodeAttribute("Bonsai.Sgen", "0.3.0.0 (Newtonsoft.Json v13.0.0.0)")]
+[JsonConverter(typeof(StringEnumConverter))]
+public enum ProbeSiUnits
+{
+    [System.Runtime.Serialization.EnumMemberAttribute(Value = "mm")]
+    Mm = 0,
+
+    [System.Runtime.Serialization.EnumMemberAttribute(Value = "um")]
+    Um = 1,
+}
+
 public struct Contact
 {
     public float PosX { get; }
     public float PosY { get; }
-    public string Shape { get; }
+    public ContactShape Shape { get; }
     public ContactShapeParam ShapeParams { get; }
     public int DeviceId { get; }
     public string ContactId { get; }
     public string ShankId { get; }
 
-    public Contact(float posX, float posY, string shape, ContactShapeParam shapeParam, int device_id, string contact_id, string shank_id)
+    public Contact(float posX, float posY, ContactShape shape, ContactShapeParam shapeParam,
+        int device_id, string contact_id, string shank_id)
     {
         PosX = posX;
         PosY = posY;
@@ -296,9 +379,16 @@ public struct Contact
     }
 }
 
+[GeneratedCodeAttribute("Bonsai.Sgen", "0.3.0.0 (Newtonsoft.Json v13.0.0.0)")]
 public class ContactShapeParam
 {
-    public float Radius { get; protected set; }
+    private float _radius;
+
+    public float Radius
+    {
+        get { return _radius; }
+        protected set { _radius = value; }
+    }
 
     public ContactShapeParam()
     {
@@ -307,14 +397,48 @@ public class ContactShapeParam
     [JsonConstructor]
     public ContactShapeParam(float radius)
     {
-        Radius = radius;
+        _radius = radius;
+    }
+
+    protected ContactShapeParam(ContactShapeParam shape)
+    {
+        _radius = shape._radius;
     }
 }
 
+[GeneratedCodeAttribute("Bonsai.Sgen", "0.3.0.0 (Newtonsoft.Json v13.0.0.0)")]
+[JsonConverter(typeof(StringEnumConverter))]
+public enum ContactShape
+{
+    [EnumMemberAttribute(Value = "circle")]
+    Circle = 0,
+
+    [EnumMemberAttribute(Value = "rect")]
+    Rect = 1,
+
+    [EnumMemberAttribute(Value = "square")]
+    Square = 2,
+}
+
+[GeneratedCodeAttribute("Bonsai.Sgen", "0.3.0.0 (Newtonsoft.Json v13.0.0.0)")]
 public class ProbeAnnotations
 {
-    public string Name { get; protected set; }
-    public string Manufacturer { get; protected set; }
+    private string _name;
+    private string _manufacturer;
+
+    [JsonProperty("name", Required = Required.Always)]
+    public string Name
+    {
+        get { return _name; }
+        protected set { _name = value; }
+    }
+
+    [JsonProperty("manufacturer", Required = Required.Always)]
+    public string Manufacturer
+    {
+        get { return _manufacturer; }
+        protected set { _manufacturer = value; }
+    }
 
     public ProbeAnnotations()
     {
@@ -323,8 +447,14 @@ public class ProbeAnnotations
     [JsonConstructor]
     public ProbeAnnotations(string name, string manufacturer)
     {
-        Name = name;
-        Manufacturer = manufacturer;
+        _name = name;
+        _manufacturer = manufacturer;
+    }
+
+    protected ProbeAnnotations(ProbeAnnotations probeAnnotations)
+    {
+        _name = probeAnnotations._name;
+        _manufacturer = probeAnnotations._manufacturer;
     }
 }
 
