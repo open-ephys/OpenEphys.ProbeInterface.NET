@@ -76,7 +76,7 @@ public abstract class ProbeGroup
         {
             int numContacts = 0;
 
-            foreach (var probe in Probes)
+            foreach (var probe in _probes)
             {
                 numContacts += probe.NumContacts;
             }
@@ -93,7 +93,7 @@ public abstract class ProbeGroup
     {
         List<string> contactIds = new();
 
-        foreach (var probe in Probes)
+        foreach (var probe in _probes)
         {
             contactIds.AddRange(probe.ContactIds.ToList());
         }
@@ -110,7 +110,7 @@ public abstract class ProbeGroup
     {
         List<int> deviceChannelIndices = new();
 
-        foreach (var probe in Probes)
+        foreach (var probe in _probes)
         {
             deviceChannelIndices.AddRange(probe.DeviceChannelIndices.ToList());
         }
@@ -122,47 +122,47 @@ public abstract class ProbeGroup
     {
         int contactNum = 0;
 
-        for (int i = 0; i < Probes.Count(); i++)
+        for (int i = 0; i < _probes.Count(); i++)
         {
-            if (Probes.ElementAt(i).ContactIds == null)
+            if (_probes.ElementAt(i).ContactIds == null)
             {
-                Probes.ElementAt(i).ContactIds = new string[Probes.ElementAt(i).ContactPositions.Length];
+                _probes.ElementAt(i).ContactIds = new string[_probes.ElementAt(i).ContactPositions.Length];
 
-                for (int j = 0; j < Probes.ElementAt(i).ContactIds.Length; j++)
+                for (int j = 0; j < _probes.ElementAt(i).ContactIds.Length; j++)
                 {
-                    Probes.ElementAt(i).ContactIds[j] = contactNum.ToString();
+                    _probes.ElementAt(i).ContactIds[j] = contactNum.ToString();
                     contactNum++;
                 }
             }
             else
-                contactNum += Probes.ElementAt(i).ContactIds.Length;
+                contactNum += _probes.ElementAt(i).ContactIds.Length;
         }
     }
 
     private void ValidateShankIds()
     {
-        for (int i = 0; i < Probes.Count(); i++)
+        for (int i = 0; i < _probes.Count(); i++)
         {
-            if (Probes.ElementAt(i).ShankIds == null)
+            if (_probes.ElementAt(i).ShankIds == null)
             {
-                Probes.ElementAt(i).ShankIds = new string[Probes.ElementAt(i).ContactPositions.Length];
+                _probes.ElementAt(i).ShankIds = new string[_probes.ElementAt(i).ContactPositions.Length];
             }
         }
     }
 
     private void ValidateDeviceChannelIndices()
     {
-        for (int i = 0; i < Probes.Count(); i++)
+        for (int i = 0; i < _probes.Count(); i++)
         {
-            if (Probes.ElementAt(i).DeviceChannelIndices == null)
+            if (_probes.ElementAt(i).DeviceChannelIndices == null)
             {
-                Probes.ElementAt(i).DeviceChannelIndices = new int[Probes.ElementAt(i).ContactIds.Length];
+                _probes.ElementAt(i).DeviceChannelIndices = new int[_probes.ElementAt(i).ContactIds.Length];
 
-                for (int j = 0; j < Probes.ElementAt(i).DeviceChannelIndices.Length; j++)
+                for (int j = 0; j < _probes.ElementAt(i).DeviceChannelIndices.Length; j++)
                 {
-                    if (int.TryParse(Probes.ElementAt(i).ContactIds[j], out int result))
+                    if (int.TryParse(_probes.ElementAt(i).ContactIds[j], out int result))
                     {
-                        Probes.ElementAt(i).DeviceChannelIndices[j] = result;
+                        _probes.ElementAt(i).DeviceChannelIndices[j] = result;
                     }
                 }
             }
