@@ -426,14 +426,14 @@ public class ProbeAnnotations
     private string _name;
     private string _manufacturer;
 
-    [JsonProperty("name", Required = Required.Always)]
+    [JsonProperty("name")]
     public string Name
     {
         get { return _name; }
         protected set { _name = value; }
     }
 
-    [JsonProperty("manufacturer", Required = Required.Always)]
+    [JsonProperty("manufacturer")]
     public string Manufacturer
     {
         get { return _manufacturer; }
