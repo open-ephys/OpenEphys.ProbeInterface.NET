@@ -21,7 +21,7 @@
 	<VersionSuffix></VersionSuffix>
 	<LangVersion>10.0</LangVersion>
 	<Nullable>enable</Nullable>
-	<Platforms>x64</Platforms>
+	<Platforms>AnyCPU</Platforms>
   </PropertyGroup>
 
 	<ItemGroup>
