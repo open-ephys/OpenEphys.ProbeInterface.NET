@@ -1,10 +1,11 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Serialization;
 using System.Runtime.Serialization;
 using System.CodeDom.Compiler;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
+using System;
 
 namespace OpenEphys.ProbeInterface;
 
@@ -58,9 +59,7 @@ public abstract class ProbeGroup
         _version = version;
         _probes = probes.ToList();
 
-        ValidateContactIds();
-        ValidateShankIds();
-        ValidateDeviceChannelIndices();
+        Validate();
     }
 
     protected ProbeGroup(ProbeGroup probeGroup)
@@ -68,6 +67,8 @@ public abstract class ProbeGroup
         _specification = probeGroup._specification;
         _version = probeGroup._version;
         _probes = probeGroup._probes;
+
+        Validate();
     }
 
     public int NumContacts
@@ -118,7 +119,77 @@ public abstract class ProbeGroup
         return deviceChannelIndices;
     }
 
-    private void ValidateContactIds()
+    /// <summary>
+    /// Check that the probe group is consistent in variable lengths, and contains minimally necessary fields
+    /// </summary>
+    public void Validate()
+    {
+        if (_specification == null || _version == null || _probes == null) 
+        {
+            throw new Exception("Necessary fields are null, unable to validate properly");
+        }
+
+        if (_probes.Count() == 0)
+        {
+            throw new Exception("No probes are listed, probes must be added during construction");
+        }
+
+        if (!ValidateVariableLength(out string result))
+        {
+            throw new Exception(result);
+        }
+
+        SetDefaultContactIdsIfMissing();
+        SetEmptyShankIdsIfMissing();
+        SetDefaultDeviceChannelIndicesIfMissing();
+
+        if (!ValidateDeviceChannelIndices())
+        {
+            throw new Exception("Device channel indices are not unique across all probes.");
+        }
+    }
+
+    private bool ValidateVariableLength(out string result)
+    {
+        for (int i = 0; i < _probes.Count(); i++)
+        {
+            if (_probes.ElementAt(i).NumberOfChannels != _probes.ElementAt(i).ContactPositions.Count() ||
+                _probes.ElementAt(i).NumberOfChannels != _probes.ElementAt(i).ContactPlaneAxes.Count() ||
+                _probes.ElementAt(i).NumberOfChannels != _probes.ElementAt(i).ContactShapeParams.Count() ||
+                _probes.ElementAt(i).NumberOfChannels != _probes.ElementAt(i).ContactShapes.Count())
+            {
+                result = $"Required contact parameters are not the same length in probe {i}. " +
+                         "Check positions / plane axes / shapes / shape parameters for lengths.";
+                return false;
+            }
+
+            if (_probes.ElementAt(i).ContactIds != null && 
+                _probes.ElementAt(i).ContactIds.Count() != _probes.ElementAt(i).NumberOfChannels)
+            {
+                result = $"Contact IDs does not have the correct number of channels for probe {i}";
+                return false;
+            }
+
+            if (_probes.ElementAt(i).ShankIds != null &&
+                _probes.ElementAt(i).ShankIds.Count() != _probes.ElementAt(i).NumberOfChannels)
+            {
+                result = $"Shank IDs does not have the correct number of channels for probe {i}";
+                return false;
+            }
+
+            if (_probes.ElementAt(i).DeviceChannelIndices != null &&
+                _probes.ElementAt(i).DeviceChannelIndices.Count() != _probes.ElementAt(i).NumberOfChannels)
+            {
+                result = $"Device Channel Indices does not have the correct number of channels for probe {i}";
+                return false;
+            }
+        }
+
+        result = "";
+        return true;
+    }
+
+    private void SetDefaultContactIdsIfMissing()
     {
         int contactNum = 0;
 
@@ -139,7 +210,7 @@ public abstract class ProbeGroup
         }
     }
 
-    private void ValidateShankIds()
+    private void SetEmptyShankIdsIfMissing()
     {
         for (int i = 0; i < _probes.Count(); i++)
         {
@@ -150,7 +221,7 @@ public abstract class ProbeGroup
         }
     }
 
-    private void ValidateDeviceChannelIndices()
+    private void SetDefaultDeviceChannelIndicesIfMissing()
     {
         for (int i = 0; i < _probes.Count(); i++)
         {
@@ -167,6 +238,22 @@ public abstract class ProbeGroup
                 }
             }
         }
+    }
+
+    private bool ValidateDeviceChannelIndices()
+    {
+        for (int i = 0; i < _probes.Count(); i++)
+        {
+            var activeChannels = _probes.ElementAt(i).DeviceChannelIndices
+                                        .Where(index => index != -1);
+
+            if (activeChannels.Count() != activeChannels.Distinct().Count())
+            {
+                return false;
+            }
+        }
+
+        return true;
     }
 }
 
