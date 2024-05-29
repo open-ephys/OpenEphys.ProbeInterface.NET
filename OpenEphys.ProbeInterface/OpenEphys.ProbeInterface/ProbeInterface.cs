@@ -78,7 +78,7 @@ public abstract class ProbeGroup
 
             foreach (var probe in _probes)
             {
-                numContacts += probe.NumContacts;
+                numContacts += probe.NumberOfChannels;
             }
 
             return numContacts;
@@ -126,16 +126,16 @@ public abstract class ProbeGroup
         {
             if (_probes.ElementAt(i).ContactIds == null)
             {
-                _probes.ElementAt(i).ContactIds = new string[_probes.ElementAt(i).ContactPositions.Length];
+                _probes.ElementAt(i).ContactIds = new string[_probes.ElementAt(i).NumberOfChannels];
 
-                for (int j = 0; j < _probes.ElementAt(i).ContactIds.Length; j++)
+                for (int j = 0; j < _probes.ElementAt(i).NumberOfChannels; j++)
                 {
                     _probes.ElementAt(i).ContactIds[j] = contactNum.ToString();
                     contactNum++;
                 }
             }
             else
-                contactNum += _probes.ElementAt(i).ContactIds.Length;
+                contactNum += _probes.ElementAt(i).NumberOfChannels;
         }
     }
 
@@ -145,7 +145,7 @@ public abstract class ProbeGroup
         {
             if (_probes.ElementAt(i).ShankIds == null)
             {
-                _probes.ElementAt(i).ShankIds = new string[_probes.ElementAt(i).ContactPositions.Length];
+                _probes.ElementAt(i).ShankIds = new string[_probes.ElementAt(i).NumberOfChannels];
             }
         }
     }
@@ -156,9 +156,9 @@ public abstract class ProbeGroup
         {
             if (_probes.ElementAt(i).DeviceChannelIndices == null)
             {
-                _probes.ElementAt(i).DeviceChannelIndices = new int[_probes.ElementAt(i).ContactIds.Length];
+                _probes.ElementAt(i).DeviceChannelIndices = new int[_probes.ElementAt(i).NumberOfChannels];
 
-                for (int j = 0; j < _probes.ElementAt(i).DeviceChannelIndices.Length; j++)
+                for (int j = 0; j < _probes.ElementAt(i).NumberOfChannels; j++)
                 {
                     if (int.TryParse(_probes.ElementAt(i).ContactIds[j], out int result))
                     {
@@ -332,7 +332,7 @@ public class Probe
             DeviceChannelIndices[index], ContactIds[index], ShankIds[index]);
     }
 
-    public int NumContacts => ContactPositions.Length;
+    public int NumberOfChannels => ContactPositions.Length;
 }
 
 [GeneratedCodeAttribute("Bonsai.Sgen", "0.3.0.0 (Newtonsoft.Json v13.0.0.0)")]
