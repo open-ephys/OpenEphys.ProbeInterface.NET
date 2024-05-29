@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Serialization;
 using System.Runtime.Serialization;
@@ -22,7 +22,7 @@ public abstract class ProbeGroup
     public string Specification
     {
         get { return _specification; }
-        set { _specification = value; }
+        protected set { _specification = value; }
     }
 
     /// <summary>
@@ -32,7 +32,7 @@ public abstract class ProbeGroup
     public string Version
     {
         get { return _version; }
-        set { _version = value; }
+        protected set { _version = value; }
     }
 
     /// <summary>
@@ -47,7 +47,7 @@ public abstract class ProbeGroup
     public IEnumerable<Probe> Probes
     {
         get { return _probes; }
-        set { _probes = value; }
+        protected set { _probes = value; }
     }
 
     protected ProbeGroup() { }
