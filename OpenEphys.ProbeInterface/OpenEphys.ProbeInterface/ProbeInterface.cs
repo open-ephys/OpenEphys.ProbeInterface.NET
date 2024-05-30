@@ -51,8 +51,6 @@ public abstract class ProbeGroup
         protected set { _probes = value; }
     }
 
-    protected ProbeGroup() { }
-
     public ProbeGroup(string specification, string version, Probe[] probes)
     {
         _specification = specification;
@@ -124,7 +122,7 @@ public abstract class ProbeGroup
     /// </summary>
     public void Validate()
     {
-        if (_specification == null || _version == null || _probes == null) 
+        if (_specification == null || _version == null || _probes == null)
         {
             throw new Exception("Necessary fields are null, unable to validate properly");
         }
@@ -163,7 +161,7 @@ public abstract class ProbeGroup
                 return false;
             }
 
-            if (_probes.ElementAt(i).ContactIds != null && 
+            if (_probes.ElementAt(i).ContactIds != null &&
                 _probes.ElementAt(i).ContactIds.Count() != _probes.ElementAt(i).NumberOfChannels)
             {
                 result = $"Contact IDs does not have the correct number of channels for probe {i}";
@@ -197,13 +195,7 @@ public abstract class ProbeGroup
         {
             if (_probes.ElementAt(i).ContactIds == null)
             {
-                _probes.ElementAt(i).ContactIds = new string[_probes.ElementAt(i).NumberOfChannels];
-
-                for (int j = 0; j < _probes.ElementAt(i).NumberOfChannels; j++)
-                {
-                    _probes.ElementAt(i).ContactIds[j] = contactNum.ToString();
-                    contactNum++;
-                }
+                _probes.ElementAt(i).ContactIds = Probe.DefaultContactIds(_probes.ElementAt(i).NumberOfChannels);
             }
             else
                 contactNum += _probes.ElementAt(i).NumberOfChannels;
@@ -216,7 +208,7 @@ public abstract class ProbeGroup
         {
             if (_probes.ElementAt(i).ShankIds == null)
             {
-                _probes.ElementAt(i).ShankIds = new string[_probes.ElementAt(i).NumberOfChannels];
+                _probes.ElementAt(i).ShankIds = Probe.DefaultShankIds(_probes.ElementAt(i).NumberOfChannels);
             }
         }
     }
@@ -242,15 +234,12 @@ public abstract class ProbeGroup
 
     private bool ValidateDeviceChannelIndices()
     {
-        for (int i = 0; i < _probes.Count(); i++)
-        {
-            var activeChannels = _probes.ElementAt(i).DeviceChannelIndices
-                                        .Where(index => index != -1);
+        var activeChannels = GetDeviceChannelIndices()
+                             .Where(index => index != -1);
 
-            if (activeChannels.Count() != activeChannels.Distinct().Count())
-            {
-                return false;
-            }
+        if (activeChannels.Count() != activeChannels.Distinct().Count())
+        {
+            return false;
         }
 
         return true;
@@ -369,8 +358,6 @@ public class Probe
         internal set { _shankIds = value; }
     }
 
-    public Probe() { }
-
     [JsonConstructor]
     public Probe(ProbeNdim ndim, ProbeSiUnits si_units, ProbeAnnotations annotations, ContactAnnotations contact_annotations,
         float[][] contact_positions, float[][][] contact_plane_axes, ContactShape[] contact_shapes,
@@ -405,6 +392,113 @@ public class Probe
         _deviceChannelIndices = probe._deviceChannelIndices;
         _contactIds = probe._contactIds;
         _shankIds = probe._shankIds;
+    }
+
+    /// <summary>
+    /// Generates a default ContactShape array that contains the given number of channels and the corresponding shape
+    /// </summary>
+    /// <param name="numberOfContacts">Number of contacts in a single probe</param>
+    /// <param name="contactShape">Enumeration of the chosen shape for a contact</param>
+    /// <returns></returns>
+    public static ContactShape[] DefaultContactShapes(int numberOfContacts, ContactShape contactShape)
+    {
+        ContactShape[] contactShapes = new ContactShape[numberOfContacts];
+
+        for (int i = 0; i < numberOfContacts; i++)
+        {
+            contactShapes[i] = contactShape;
+        }
+
+        return contactShapes;
+    }
+
+    /// <summary>
+    /// Generates a default contactPlaneAxes array, with each contact given the same axis; { { 1, 0 }, { 0, 1 } }
+    /// </summary>
+    /// <param name="numberOfContacts">Number of contacts in a single probe</param>
+    /// <returns></returns>
+    public static float[][][] DefaultContactPlaneAxes(int numberOfContacts)
+    {
+        float[][][] contactPlaneAxes = new float[numberOfContacts][][];
+
+        for (int i = 0; i < numberOfContacts; i++)
+        {
+            contactPlaneAxes[i] = new float[2][] { new float[2] { 1.0f, 0.0f }, new float[2] { 0.0f, 1.0f } };
+        }
+
+        return contactPlaneAxes;
+    }
+
+    /// <summary>
+    /// Generates an array of contact shape parameters for the circle, based on the given number of contacts and the given radius
+    /// </summary>
+    /// <param name="numberOfContacts">Number of contacts in a single probe</param>
+    /// <param name="radius">Radius of the contact, in the current probe units</param>
+    /// <returns></returns>
+    public static ContactShapeParam[] DefaultCircleParams(int numberOfContacts, float radius)
+    {
+        ContactShapeParam[] contactShapeParams = new ContactShapeParam[numberOfContacts];
+
+        for (int i = 0; i < numberOfContacts; i++)
+        {
+            contactShapeParams[i] = new ContactShapeParam(radius);
+        }
+
+        return contactShapeParams;
+    }
+
+    /// <summary>
+    /// Generates an array of sequential device channel indices, based on the number of contacts and the offset given.
+    /// Note that device channel indices must be unique across all probes.
+    /// </summary>
+    /// <param name="numberOfContacts">Number of contacts in a single probe</param>
+    /// <param name="offset">The first value of the sequential device channel indices</param>
+    /// <returns></returns>
+    public static int[] DefaultDeviceChannelIndices(int numberOfContacts, int offset)
+    {
+        int[] deviceChannelIndices = new int[numberOfContacts];
+
+        for (int i = 0; i < numberOfContacts; i++)
+        {
+            deviceChannelIndices[i] = i + offset;
+        }
+
+        return deviceChannelIndices;
+    }
+
+    /// <summary>
+    /// Generates a sequential array of contact IDs based on the number of contacts.
+    /// Note that contact IDs do not need to be unique across probes.
+    /// </summary>
+    /// <param name="numberOfContacts">Number of contacts in a single probe</param>
+    /// <returns></returns>
+    public static string[] DefaultContactIds(int numberOfContacts)
+    {
+        string[] contactIds = new string[numberOfContacts];
+
+        for (int i = 0; i < numberOfContacts; i++)
+        {
+            contactIds[i] = i.ToString();
+        }
+
+        return contactIds;
+    }
+
+    /// <summary>
+    /// Generates an array of empty strings as the default shank ID
+    /// </summary>
+    /// <param name="numberOfContacts">Number of contacts in a single probe</param>
+    /// <returns></returns>
+    public static string[] DefaultShankIds(int numberOfContacts)
+    {
+        string[] contactIds = new string[numberOfContacts];
+
+        for (int i = 0; i < numberOfContacts; i++)
+        {
+            contactIds[i] = "";
+        }
+
+        return contactIds;
     }
 
     /// <summary>
@@ -443,7 +537,7 @@ public enum ProbeSiUnits
     Um = 1,
 }
 
-public struct Contact
+public readonly struct Contact
 {
     public float PosX { get; }
     public float PosY { get; }
@@ -475,10 +569,6 @@ public class ContactShapeParam
     {
         get { return _radius; }
         protected set { _radius = value; }
-    }
-
-    public ContactShapeParam()
-    {
     }
 
     [JsonConstructor]
@@ -527,10 +617,6 @@ public class ProbeAnnotations
         protected set { _manufacturer = value; }
     }
 
-    public ProbeAnnotations()
-    {
-    }
-
     [JsonConstructor]
     public ProbeAnnotations(string name, string manufacturer)
     {
@@ -547,15 +633,17 @@ public class ProbeAnnotations
 
 public class ContactAnnotations
 {
-    public string[] Contact_Annotations { get; protected set; }
+    private string[] _contactAnnotations;
 
-    public ContactAnnotations()
+    public string[] Annotations
     {
+        get { return _contactAnnotations; }
+        protected set { _contactAnnotations = value; }
     }
 
     [JsonConstructor]
-    public ContactAnnotations(string[] contact_annotations)
+    public ContactAnnotations(string[] contactAnnotations)
     {
-        Contact_Annotations = contact_annotations;
+        _contactAnnotations = contactAnnotations;
     }
 }
