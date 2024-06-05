@@ -441,7 +441,25 @@ public class Probe
 
         for (int i = 0; i < numberOfContacts; i++)
         {
-            contactShapeParams[i] = new ContactShapeParam(radius);
+            contactShapeParams[i] = new ContactShapeParam(radius:radius);
+        }
+
+        return contactShapeParams;
+    }
+
+    /// <summary>
+    /// Generates an array of contact shape parameters for the square, based on the given number of contacts and the given width
+    /// </summary>
+    /// <param name="numberOfContacts">Number of contacts in a single probe</param>
+    /// <param name="width">Width of the contact, in the current probe units</param>
+    /// <returns></returns>
+    public static ContactShapeParam[] DefaultSquareParams(int numberOfContacts, float width)
+    {
+        ContactShapeParam[] contactShapeParams = new ContactShapeParam[numberOfContacts];
+
+        for (int i = 0; i < numberOfContacts; i++)
+        {
+            contactShapeParams[i] = new ContactShapeParam(width:width);
         }
 
         return contactShapeParams;
@@ -563,23 +581,32 @@ public readonly struct Contact
 [GeneratedCodeAttribute("Bonsai.Sgen", "0.3.0.0 (Newtonsoft.Json v13.0.0.0)")]
 public class ContactShapeParam
 {
-    private float _radius;
+    private float? _radius;
+    private float? _width;
 
-    public float Radius
+    public float? Radius
     {
         get { return _radius; }
         protected set { _radius = value; }
     }
 
-    [JsonConstructor]
-    public ContactShapeParam(float radius)
+    public float? Width
     {
-        _radius = radius;
+        get { return _width; }
+        protected set { _width = value; }
+    }
+
+    [JsonConstructor]
+    public ContactShapeParam(float radius = 0.0f, float width = 0.0f)
+    {
+        _radius = radius == 0.0f ? null : radius;
+        _width = width == 0.0f ? null : width;
     }
 
     protected ContactShapeParam(ContactShapeParam shape)
     {
         _radius = shape._radius;
+        _width = shape._width;
     }
 }
 
