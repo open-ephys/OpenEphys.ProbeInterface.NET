@@ -441,7 +441,7 @@ public class Probe
 
         for (int i = 0; i < numberOfContacts; i++)
         {
-            contactShapeParams[i] = new ContactShapeParam(radius:radius);
+            contactShapeParams[i] = new ContactShapeParam(radius:radius, width:null);
         }
 
         return contactShapeParams;
@@ -459,7 +459,7 @@ public class Probe
 
         for (int i = 0; i < numberOfContacts; i++)
         {
-            contactShapeParams[i] = new ContactShapeParam(width:width);
+            contactShapeParams[i] = new ContactShapeParam(width:width, radius:null);
         }
 
         return contactShapeParams;
@@ -528,7 +528,7 @@ public class Probe
     public Contact GetContact(int index)
     {
         return new Contact(ContactPositions[index][0], ContactPositions[index][1], ContactShapes[index], ContactShapeParams[index],
-            DeviceChannelIndices[index], ContactIds[index], ShankIds[index]);
+            DeviceChannelIndices[index], ContactIds[index], ShankIds[index], index);
     }
 
     public int NumberOfChannels => ContactPositions.Length;
@@ -564,9 +564,10 @@ public readonly struct Contact
     public int DeviceId { get; }
     public string ContactId { get; }
     public string ShankId { get; }
+    public int Index { get; }
 
     public Contact(float posX, float posY, ContactShape shape, ContactShapeParam shapeParam,
-        int device_id, string contact_id, string shank_id)
+        int device_id, string contact_id, string shank_id, int index)
     {
         PosX = posX;
         PosY = posY;
@@ -575,6 +576,7 @@ public readonly struct Contact
         DeviceId = device_id;
         ContactId = contact_id;
         ShankId = shank_id;
+        Index = index;
     }
 }
 
@@ -597,10 +599,10 @@ public class ContactShapeParam
     }
 
     [JsonConstructor]
-    public ContactShapeParam(float radius = 0.0f, float width = 0.0f)
+    public ContactShapeParam(float? radius, float? width)
     {
-        _radius = radius == 0.0f ? null : radius;
-        _width = width == 0.0f ? null : width;
+        _radius = radius;
+        _width = width;
     }
 
     protected ContactShapeParam(ContactShapeParam shape)
