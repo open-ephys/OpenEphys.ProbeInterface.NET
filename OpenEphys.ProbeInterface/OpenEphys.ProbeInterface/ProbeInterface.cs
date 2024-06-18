@@ -69,7 +69,7 @@ public abstract class ProbeGroup
         Validate();
     }
 
-    public int NumContacts
+    public int NumberOfContacts
     {
         get
         {
@@ -77,7 +77,7 @@ public abstract class ProbeGroup
 
             foreach (var probe in _probes)
             {
-                numContacts += probe.NumberOfChannels;
+                numContacts += probe.NumberOfContacts;
             }
 
             return numContacts;
@@ -151,10 +151,10 @@ public abstract class ProbeGroup
     {
         for (int i = 0; i < _probes.Count(); i++)
         {
-            if (_probes.ElementAt(i).NumberOfChannels != _probes.ElementAt(i).ContactPositions.Count() ||
-                _probes.ElementAt(i).NumberOfChannels != _probes.ElementAt(i).ContactPlaneAxes.Count() ||
-                _probes.ElementAt(i).NumberOfChannels != _probes.ElementAt(i).ContactShapeParams.Count() ||
-                _probes.ElementAt(i).NumberOfChannels != _probes.ElementAt(i).ContactShapes.Count())
+            if (_probes.ElementAt(i).NumberOfContacts != _probes.ElementAt(i).ContactPositions.Count() ||
+                _probes.ElementAt(i).NumberOfContacts != _probes.ElementAt(i).ContactPlaneAxes.Count() ||
+                _probes.ElementAt(i).NumberOfContacts != _probes.ElementAt(i).ContactShapeParams.Count() ||
+                _probes.ElementAt(i).NumberOfContacts != _probes.ElementAt(i).ContactShapes.Count())
             {
                 result = $"Required contact parameters are not the same length in probe {i}. " +
                          "Check positions / plane axes / shapes / shape parameters for lengths.";
@@ -162,21 +162,21 @@ public abstract class ProbeGroup
             }
 
             if (_probes.ElementAt(i).ContactIds != null &&
-                _probes.ElementAt(i).ContactIds.Count() != _probes.ElementAt(i).NumberOfChannels)
+                _probes.ElementAt(i).ContactIds.Count() != _probes.ElementAt(i).NumberOfContacts)
             {
                 result = $"Contact IDs does not have the correct number of channels for probe {i}";
                 return false;
             }
 
             if (_probes.ElementAt(i).ShankIds != null &&
-                _probes.ElementAt(i).ShankIds.Count() != _probes.ElementAt(i).NumberOfChannels)
+                _probes.ElementAt(i).ShankIds.Count() != _probes.ElementAt(i).NumberOfContacts)
             {
                 result = $"Shank IDs does not have the correct number of channels for probe {i}";
                 return false;
             }
 
             if (_probes.ElementAt(i).DeviceChannelIndices != null &&
-                _probes.ElementAt(i).DeviceChannelIndices.Count() != _probes.ElementAt(i).NumberOfChannels)
+                _probes.ElementAt(i).DeviceChannelIndices.Count() != _probes.ElementAt(i).NumberOfContacts)
             {
                 result = $"Device Channel Indices does not have the correct number of channels for probe {i}";
                 return false;
@@ -195,10 +195,10 @@ public abstract class ProbeGroup
         {
             if (_probes.ElementAt(i).ContactIds == null)
             {
-                _probes.ElementAt(i).ContactIds = Probe.DefaultContactIds(_probes.ElementAt(i).NumberOfChannels);
+                _probes.ElementAt(i).ContactIds = Probe.DefaultContactIds(_probes.ElementAt(i).NumberOfContacts);
             }
             else
-                contactNum += _probes.ElementAt(i).NumberOfChannels;
+                contactNum += _probes.ElementAt(i).NumberOfContacts;
         }
     }
 
@@ -208,7 +208,7 @@ public abstract class ProbeGroup
         {
             if (_probes.ElementAt(i).ShankIds == null)
             {
-                _probes.ElementAt(i).ShankIds = Probe.DefaultShankIds(_probes.ElementAt(i).NumberOfChannels);
+                _probes.ElementAt(i).ShankIds = Probe.DefaultShankIds(_probes.ElementAt(i).NumberOfContacts);
             }
         }
     }
@@ -219,9 +219,9 @@ public abstract class ProbeGroup
         {
             if (_probes.ElementAt(i).DeviceChannelIndices == null)
             {
-                _probes.ElementAt(i).DeviceChannelIndices = new int[_probes.ElementAt(i).NumberOfChannels];
+                _probes.ElementAt(i).DeviceChannelIndices = new int[_probes.ElementAt(i).NumberOfContacts];
 
-                for (int j = 0; j < _probes.ElementAt(i).NumberOfChannels; j++)
+                for (int j = 0; j < _probes.ElementAt(i).NumberOfContacts; j++)
                 {
                     if (int.TryParse(_probes.ElementAt(i).ContactIds[j], out int result))
                     {
@@ -232,7 +232,7 @@ public abstract class ProbeGroup
         }
     }
 
-    private bool ValidateDeviceChannelIndices()
+    public bool ValidateDeviceChannelIndices()
     {
         var activeChannels = GetDeviceChannelIndices()
                              .Where(index => index != -1);
@@ -531,7 +531,7 @@ public class Probe
             DeviceChannelIndices[index], ContactIds[index], ShankIds[index], index);
     }
 
-    public int NumberOfChannels => ContactPositions.Length;
+    public int NumberOfContacts => ContactPositions.Length;
 }
 
 [GeneratedCodeAttribute("Bonsai.Sgen", "0.3.0.0 (Newtonsoft.Json v13.0.0.0)")]
