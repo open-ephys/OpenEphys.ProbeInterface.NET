@@ -244,6 +244,16 @@ public abstract class ProbeGroup
 
         return true;
     }
+
+    public void UpdateDeviceChannelIndices(int probeIndex, int[] deviceChannelIndices)
+    {
+        _probes.ElementAt(probeIndex).DeviceChannelIndices = deviceChannelIndices;
+
+        if (!ValidateDeviceChannelIndices())
+        {
+            throw new ArgumentException("Device channel indices are not valid. Ensure that all values are either -1 or are unique.");
+        }
+    }
 }
 
 [GeneratedCodeAttribute("Bonsai.Sgen", "0.3.0.0 (Newtonsoft.Json v13.0.0.0)")]
