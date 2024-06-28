@@ -99,6 +99,21 @@ public abstract class ProbeGroup
 
         return contactIds;
     }
+    
+    public List<Contact> GetContacts()
+    {
+        List<Contact> contacts = new();
+
+        foreach(var p in Probes)
+        {
+            for (int i = 0; i < p.NumberOfContacts; i++)
+            {
+                contacts.Add(p.GetContact(i));
+            }
+        }
+
+        return contacts;
+    }
 
     /// <summary>
     /// Returns device channel indices of all contacts in all probe. Device channel indices are guaranteed to be
