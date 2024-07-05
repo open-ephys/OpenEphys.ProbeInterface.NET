@@ -99,12 +99,12 @@ public abstract class ProbeGroup
 
         return contactIds;
     }
-    
+
     public List<Contact> GetContacts()
     {
         List<Contact> contacts = new();
 
-        foreach(var p in Probes)
+        foreach (var p in Probes)
         {
             for (int i = 0; i < p.NumberOfContacts; i++)
             {
@@ -153,6 +153,7 @@ public abstract class ProbeGroup
         }
 
         SetDefaultContactIdsIfMissing();
+        ValidateContactIds();
         SetEmptyShankIdsIfMissing();
         SetDefaultDeviceChannelIndicesIfMissing();
 
@@ -214,6 +215,37 @@ public abstract class ProbeGroup
             }
             else
                 contactNum += _probes.ElementAt(i).NumberOfContacts;
+        }
+    }
+
+    private void ValidateContactIds()
+    {
+        CheckIfContactIdsAreZeroIndexed();
+    }
+
+    private void CheckIfContactIdsAreZeroIndexed()
+    {
+        var contactIds = GetContactIds();
+
+        var numericIds = contactIds.Select(c => { return int.Parse(c); })
+                                   .ToList();
+
+        var min = numericIds.Min();
+
+        var max = numericIds.Max();
+
+        if (min == 1 && max == NumberOfContacts && numericIds.Count == numericIds.Distinct().Count())
+        {
+            for (int i = 0; i < _probes.Count(); i++)
+            {
+                var probe = _probes.ElementAt(i);
+                var newContactIds = probe.ContactIds.Select(c => { return (int.Parse(c) - 1).ToString(); });
+
+                for (int j = 0; j < probe.NumberOfContacts; j++)
+                {
+                    probe.ContactIds.SetValue(newContactIds.ElementAt(j), j);
+                }
+            }
         }
     }
 
@@ -466,7 +498,7 @@ public class Probe
 
         for (int i = 0; i < numberOfContacts; i++)
         {
-            contactShapeParams[i] = new ContactShapeParam(radius:radius, width:null);
+            contactShapeParams[i] = new ContactShapeParam(radius: radius, width: null);
         }
 
         return contactShapeParams;
@@ -484,7 +516,7 @@ public class Probe
 
         for (int i = 0; i < numberOfContacts; i++)
         {
-            contactShapeParams[i] = new ContactShapeParam(width:width, radius:null);
+            contactShapeParams[i] = new ContactShapeParam(width: width, radius: null);
         }
 
         return contactShapeParams;
