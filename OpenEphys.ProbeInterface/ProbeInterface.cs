@@ -56,7 +56,7 @@ public abstract class ProbeGroup
     }
 
     /// <summary>
-    /// <see cref="ProbeGroup"/> constructor.
+    /// Initializes a new instance of the <see cref="ProbeGroup"/> class.
     /// </summary>
     /// <param name="specification">Defines the <see cref="Specification"/> parameter</param>
     /// <param name="version">Defines the <see cref="Version"/> parameter</param>
@@ -71,7 +71,7 @@ public abstract class ProbeGroup
     }
 
     /// <summary>
-    /// Copy constructor that takes in an existing <see cref="ProbeGroup"/> object and copies the individal fields.
+    /// Copy constructor that takes in an existing <see cref="ProbeGroup"/> object and copies the individual fields.
     /// </summary>
     /// <param name="probeGroup"></param>
     protected ProbeGroup(ProbeGroup probeGroup)
@@ -376,7 +376,7 @@ public class Probe
     }
 
     /// <summary>
-    /// Units to use while plottin the probe and all contacts. Options are 
+    /// Units to use while plotting the probe and all contacts. Options are 
     /// <see cref="ProbeSiUnits.um"/> and <see cref="ProbeSiUnits.mm"/>.
     /// </summary>
     [XmlIgnore]
@@ -983,7 +983,7 @@ public class ContactAnnotations
     }
 
     /// <summary>
-    /// Constructor that initalizes the contact annotations class.
+    /// Constructor that initializes the contact annotations class.
     /// </summary>
     /// <param name="contactAnnotations"></param>
     [JsonConstructor]
