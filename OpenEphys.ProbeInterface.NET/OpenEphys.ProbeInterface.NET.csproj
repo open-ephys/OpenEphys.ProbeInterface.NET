@@ -3,7 +3,6 @@
     <Title>OpenEphys.ProbeInterface.NET</Title>
     <Description>API based on Probeinterface specifications for parsing channel configurations</Description>
     <PackageTags>Bonsai Rx Open Ephys Onix</PackageTags>
-    <GeneratePackageOnBuild Condition="'$(Configuration)'=='Release'">true</GeneratePackageOnBuild>
     <TargetFramework>net472</TargetFramework>
     <Nullable>enable</Nullable>
     <Platforms>AnyCPU</Platforms>
