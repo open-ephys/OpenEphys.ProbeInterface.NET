@@ -41,7 +41,7 @@ jobs:
             collect-packages: true
     runs-on: ${{ matrix.os }}
     env:
-      CiBuildVersionSuffic: ${{ needs.setup.outputs.build-suffix }}
+      CiBuildVersionSuffix: ${{ needs.setup.outputs.build-suffix }}
 
     steps:
       - name: Checkout
