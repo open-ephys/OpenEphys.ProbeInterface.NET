@@ -10,8 +10,7 @@ using System;
 namespace OpenEphys.ProbeInterface;
 
 /// <summary>
-/// Abstract class that implements the Probe Interface specification in C#. Allows for JSON files to be loaded in as 
-/// <see cref="ProbeGroup"/> objects.
+/// Abstract class that implements the Probeinterface specification in C# for .NET.
 /// </summary>
 [GeneratedCodeAttribute("Bonsai.Sgen", "0.3.0.0 (Newtonsoft.Json v13.0.0.0)")]
 public abstract class ProbeGroup
@@ -21,8 +20,11 @@ public abstract class ProbeGroup
     private IEnumerable<Probe> _probes;
 
     /// <summary>
-    /// String defining the specification of the file. This is expected to be "probeinterface".
+    /// Gets the string defining the specification of the file.
     /// </summary>
+    /// <remarks>
+    /// For Probeinterface files, this value is expected to be "probeinterface".
+    /// </remarks>
     [JsonProperty("specification", Required = Required.Always)]
     public string Specification
     {
@@ -31,7 +33,7 @@ public abstract class ProbeGroup
     }
 
     /// <summary>
-    /// String defining which version of Probe Interface was used.
+    /// Gets the string defining which version of Probeinterface was used.
     /// </summary>
     [JsonProperty("version", Required = Required.Always)]
     public string Version
@@ -41,12 +43,15 @@ public abstract class ProbeGroup
     }
 
     /// <summary>
-    /// IEnumerable of probes that are present. Each probe can contain multiple shanks, and each probe has a unique
-    /// contour that defines the physical representation of the probe. Contacts have several representations
-    /// for their channel number, specifically ContactIds (a string that is not guaranteed to be unique) and
-    /// DeviceChannelIds (guaranteed to be unique across all probes). DeviceChannelIds can also be set to -1
-    /// to indicate that the channel was not connected or recorded from.
+    /// Gets an IEnumerable of probes that are present.
     /// </summary>
+    /// <remarks>
+    /// Each probe can contain multiple shanks, and each probe has a unique
+    /// contour that defines the physical representation of the probe. Contacts have several representations
+    /// for their channel number, specifically <see cref="Probe.ContactIds"/> (a string that is not guaranteed to be unique) and
+    /// <see cref="Probe.DeviceChannelIndices"/> (guaranteed to be unique across all probes). <see cref="Probe.DeviceChannelIndices"/>'s can also be set to -1
+    /// to indicate that the channel was not connected or recorded from.
+    /// </remarks>
     [XmlIgnore]
     [JsonProperty("probes", Required = Required.Always)]
     public IEnumerable<Probe> Probes
@@ -58,9 +63,9 @@ public abstract class ProbeGroup
     /// <summary>
     /// Initializes a new instance of the <see cref="ProbeGroup"/> class.
     /// </summary>
-    /// <param name="specification">Defines the <see cref="Specification"/> parameter</param>
-    /// <param name="version">Defines the <see cref="Version"/> parameter</param>
-    /// <param name="probes">Defines a list of <see cref="Probe"/> objects</param>
+    /// <param name="specification">String defining the <see cref="Specification"/> parameter.</param>
+    /// <param name="version">String defining the <see cref="Version"/> parameter.</param>
+    /// <param name="probes">IEnumerable of <see cref="Probe"/> objects.</param>
     public ProbeGroup(string specification, string version, IEnumerable<Probe> probes)
     {
         _specification = specification;
@@ -73,7 +78,11 @@ public abstract class ProbeGroup
     /// <summary>
     /// Copy constructor that takes in an existing <see cref="ProbeGroup"/> object and copies the individual fields.
     /// </summary>
-    /// <param name="probeGroup"></param>
+    /// <remarks>
+    /// After copying the relevant fields, the <see cref="ProbeGroup"/> is validated to ensure that it is compliant
+    /// with the Probeinterface specification. See <see cref="Validate"/> for more details on what is checked.
+    /// </remarks>
+    /// <param name="probeGroup">Existing <see cref="ProbeGroup"/> object.</param>
     protected ProbeGroup(ProbeGroup probeGroup)
     {
         _specification = probeGroup._specification;
@@ -84,7 +93,7 @@ public abstract class ProbeGroup
     }
 
     /// <summary>
-    /// Number of contacts across all <see cref="Probe"/> objects.
+    /// Gets the number of contacts across all <see cref="Probe"/> objects.
     /// </summary>
     public int NumberOfContacts
     {
@@ -102,9 +111,12 @@ public abstract class ProbeGroup
     }
 
     /// <summary>
-    /// Returns the contact IDs of all contacts in all probes. Note that these are not guaranteed to be unique values across probes.
+    /// Returns the <see cref="Probe.ContactIds"/>'s of all contacts in all probes.
     /// </summary>
-    /// <returns>List of strings containing all contact IDs</returns>
+    /// <remarks>
+    /// Note that these are not guaranteed to be unique values across probes.
+    /// </remarks>
+    /// <returns>List of strings containing all contact IDs.</returns>
     public IEnumerable<string> GetContactIds()
     {
         List<string> contactIds = new();
@@ -118,7 +130,7 @@ public abstract class ProbeGroup
     }
 
     /// <summary>
-    /// Creates <see cref="Contact"/> objects for every contact in the <see cref="ProbeGroup"/>.
+    /// Returns all <see cref="Contact"/> objects in the <see cref="ProbeGroup"/>.
     /// </summary>
     /// <returns><see cref="List{Contact}"/></returns>
     public List<Contact> GetContacts()
@@ -137,9 +149,12 @@ public abstract class ProbeGroup
     }
 
     /// <summary>
-    /// Returns device channel indices of all contacts in all probe. Device channel indices are guaranteed to be
-    /// unique, unless they are -1.
+    /// Returns all <see cref="Probe.DeviceChannelIndices"/>'s in the <see cref="ProbeGroup"/>.
     /// </summary>
+    /// <remarks>
+    /// Device channel indices are guaranteed to be unique, unless they are -1. Multiple contacts can be
+    /// set to -1 to indicate they are not recorded from.
+    /// </remarks>
     /// <returns><see cref="IEnumerable{Int32}"/></returns>
     public IEnumerable<int> GetDeviceChannelIndices()
     {
@@ -154,8 +169,24 @@ public abstract class ProbeGroup
     }
 
     /// <summary>
-    /// Check that the probe group is consistent in variable lengths, and that it contains minimally necessary fields.
+    /// Validate that the <see cref="ProbeGroup"/> correctly implements the Probeinterface specification.
     /// </summary>
+    /// <remarks>
+    /// <para>Check that all necessary fields are populated (<see cref="Specification"/>,
+    /// <see cref="Version"/>, <see cref="Probes"/>).</para>
+    /// <para>Check that there is at least one <see cref="Probe"/> defined.</para>
+    /// <para>Check that all variables in each <see cref="Probe"/> have the same length.</para>
+    /// <para>Check if <see cref="Probe.ContactIds"/> are present, and generate default values
+    /// based on the index if there are no values defined.</para>
+    /// <para>Check if <see cref="Probe.ContactIds"/> are zero-indexed, and convert to
+    /// zero-indexed if possible.</para>
+    /// <para>Check if <see cref="Probe.ShankIds"/> are defined, and initialize empty strings 
+    /// if they are not defined.</para>
+    /// <para>Check if <see cref="Probe.DeviceChannelIndices"/> are defined, and initialize default
+    /// values (using the <see cref="Probe.ContactIds"/> value as the new <see cref="Probe.DeviceChannelIndices"/>).</para>
+    /// <para>Check that all <see cref="Probe.DeviceChannelIndices"/> are unique across all <see cref="Probe"/>'s,
+    /// unless the value is -1; multiple contacts can be set to -1.</para>
+    /// </remarks>
     public void Validate()
     {
         if (_specification == null || _version == null || _probes == null)
@@ -247,12 +278,10 @@ public abstract class ProbeGroup
     private void CheckIfContactIdsAreZeroIndexed()
     {
         var contactIds = GetContactIds();
-
         var numericIds = contactIds.Select(c => { return int.Parse(c); })
                                    .ToList();
 
         var min = numericIds.Min();
-
         var max = numericIds.Max();
 
         if (min == 1 && max == NumberOfContacts && numericIds.Count == numericIds.Distinct().Count())
@@ -301,11 +330,14 @@ public abstract class ProbeGroup
     }
 
     /// <summary>
-    /// Validate the uniqueness of device channel indices; all indices greater than or equal to 0 must be unique,
+    /// Validate the uniqueness of all <see cref="Probe.DeviceChannelIndices"/>'s across all <see cref="Probe"/>'s.
+    /// </summary>
+    /// <remarks>
+    /// All indices that are greater than or equal to 0 must be unique,
     /// but there can be as many values equal to -1 as there are contacts. A value of -1 indicates that this contact is 
     /// not being recorded.
-    /// </summary>
-    /// <returns></returns>
+    /// </remarks>
+    /// <returns>True if all values not equal to -1 are unique, False if there are duplicates.</returns>
     public bool ValidateDeviceChannelIndices()
     {
         var activeChannels = GetDeviceChannelIndices()
@@ -320,12 +352,15 @@ public abstract class ProbeGroup
     }
 
     /// <summary>
+    /// Update the <see cref="Probe.DeviceChannelIndices"/> at the given probe index.
+    /// </summary>
+    /// <remarks>
     /// Device channel indices can be updated as contacts are being enabled or disabled. This is done on a 
     /// per-probe basis, where the incoming array of indices must be the same size as the original probe, 
     /// and must follow the standard for uniqueness found in <see cref="Probe.DeviceChannelIndices"/>.
-    /// </summary>
-    /// <param name="probeIndex"></param>
-    /// <param name="deviceChannelIndices"></param>
+    /// </remarks>
+    /// <param name="probeIndex">Zero-based index of the probe to update.</param>
+    /// <param name="deviceChannelIndices">Array of <see cref="Probe.DeviceChannelIndices"/>.</param>
     /// <exception cref="ArgumentException"></exception>
     public void UpdateDeviceChannelIndices(int probeIndex, int[] deviceChannelIndices)
     {
@@ -364,8 +399,7 @@ public class Probe
     private string[] _shankIds;
 
     /// <summary>
-    /// Number of dimensions to use while plotting the probe. Options are 
-    /// <see cref="ProbeNdim.Two"/> and <see cref="ProbeNdim.Three"/>.
+    /// Gets the <see cref="ProbeNdim"/> to use while plotting the <see cref="Probe"/>.
     /// </summary>
     [XmlIgnore]
     [JsonProperty("ndim", Required = Required.Always)]
@@ -376,8 +410,7 @@ public class Probe
     }
 
     /// <summary>
-    /// Units to use while plotting the probe and all contacts. Options are 
-    /// <see cref="ProbeSiUnits.um"/> and <see cref="ProbeSiUnits.mm"/>.
+    /// Gets the <see cref="ProbeSiUnits"/> to use while plotting the <see cref="Probe"/>.
     /// </summary>
     [XmlIgnore]
     [JsonProperty("si_units", Required = Required.Always)]
@@ -388,8 +421,11 @@ public class Probe
     }
 
     /// <summary>
-    /// Annotations related to the probe itself. Used to specify the name of the probe, and the manufacturer.
+    /// Gets the <see cref="ProbeAnnotations"/> for the <see cref="Probe"/>.
     /// </summary>
+    /// <remarks>
+    /// Used to specify the name of the probe, and the manufacturer.
+    /// </remarks>
     [XmlIgnore]
     [JsonProperty("annotations", Required = Required.Always)]
     public ProbeAnnotations Annotations
@@ -399,9 +435,12 @@ public class Probe
     }
 
     /// <summary>
-    /// Annotations related to the contacts, noting things like where it physically is within a specimen, or if it
-    /// is no longer functioning correctly.
+    /// Gets the <see cref="ProbeInterface.ContactAnnotations"/> for the <see cref="Probe"/>.
     /// </summary>
+    /// <remarks>
+    /// This field can be used for noting things like where it physically is within a specimen, or if it
+    /// is no longer functioning correctly.
+    /// </remarks>
     [XmlIgnore]
     [JsonProperty("contact_annotations")]
     public ContactAnnotations ContactAnnotations
@@ -411,9 +450,12 @@ public class Probe
     }
 
     /// <summary>
-    /// Contact positions, specifically the center point of every contact. This is a two-dimensional array of
-    /// floats; the first index is the index of the contact, and the second index is the X and Y value, respectively.
+    /// Gets the <see cref="Contact"/> positions, specifically the center point of every contact.
     /// </summary>
+    /// <remarks>
+    /// This is a two-dimensional array of floats; the first index is the index of the contact, and
+    /// the second index is the X and Y value, respectively.
+    /// </remarks>
     [XmlIgnore]
     [JsonProperty("contact_positions", Required = Required.Always)]
     public float[][] ContactPositions
@@ -423,7 +465,7 @@ public class Probe
     }
 
     /// <summary>
-    /// Defines if/how contacts are rotated.
+    /// Gets the plane axes for the contacts.
     /// </summary>
     [XmlIgnore]
     [JsonProperty("contact_plane_axes")]
@@ -434,8 +476,7 @@ public class Probe
     }
 
     /// <summary>
-    /// Defines the shape for each contact. Possible options are <see cref="ContactShape.Circle"/>,
-    /// <see cref="ContactShape.Rect"/>, and <see cref="ContactShape.Square"/>
+    /// Gets the <see cref="ContactShape"/> for each contact.
     /// </summary>
     [XmlIgnore]
     [JsonProperty("contact_shapes", Required = Required.Always)]
@@ -446,11 +487,14 @@ public class Probe
     }
 
     /// <summary>
-    /// Defines the parameters of the shape for each contact. Depending on which <see cref="ContactShape"/>
+    /// Gets the parameters of the shape for each contact.
+    /// </summary>
+    /// <remarks>
+    /// Depending on which <see cref="ContactShape"/>
     /// is selected, not all parameters are needed; for instance, <see cref="ContactShape.Circle"/> only uses
     /// <see cref="ContactShapeParam.Radius"/>, while <see cref="ContactShape.Square"/> just uses
     /// <see cref="ContactShapeParam.Width"/>.
-    /// </summary>
+    /// </remarks>
     [XmlIgnore]
     [JsonProperty("contact_shape_params", Required = Required.Always)]
     public ContactShapeParam[] ContactShapeParams
@@ -460,7 +504,7 @@ public class Probe
     }
 
     /// <summary>
-    /// Defines the outline of the probe that represents the physical shape. This should fully encapsulate all contacts.
+    /// Gets the outline of the probe that represents the physical shape.
     /// </summary>
     [XmlIgnore]
     [JsonProperty("probe_planar_contour")]
@@ -471,7 +515,7 @@ public class Probe
     }
 
     /// <summary>
-    /// Indices of each channel defining their recording channel number. Must be unique, except for contacts
+    /// Gets the indices of each channel defining their recording channel number. Must be unique, except for contacts
     /// that are set to -1 if they disabled.
     /// </summary>
     [XmlIgnore]
@@ -483,7 +527,7 @@ public class Probe
     }
 
     /// <summary>
-    /// Contact IDs for each channel. These do not have to be unique.
+    /// Gets the contact IDs for each channel. These do not have to be unique.
     /// </summary>
     [XmlIgnore]
     [JsonProperty("contact_ids")]
@@ -494,7 +538,7 @@ public class Probe
     }
 
     /// <summary>
-    /// Defines the shank ID that each contact belongs to.
+    /// Gets the shank that each contact belongs to.
     /// </summary>
     [XmlIgnore]
     [JsonProperty("shank_ids")]
@@ -560,11 +604,11 @@ public class Probe
     }
 
     /// <summary>
-    /// Generates a default ContactShape array that contains the given number of channels and the corresponding shape
+    /// Returns default <see cref="ContactShape"/> array that contains the given number of channels and the corresponding shape.
     /// </summary>
-    /// <param name="numberOfContacts">Number of contacts in a single probe</param>
-    /// <param name="contactShape">Enumeration of the chosen shape for a contact</param>
-    /// <returns></returns>
+    /// <param name="numberOfContacts">Number of contacts in a single <see cref="Probe"/>.</param>
+    /// <param name="contactShape">The <see cref="ContactShape"/> to apply to each contact.</param>
+    /// <returns><see cref="ContactShape"/> array.</returns>
     public static ContactShape[] DefaultContactShapes(int numberOfContacts, ContactShape contactShape)
     {
         ContactShape[] contactShapes = new ContactShape[numberOfContacts];
@@ -578,10 +622,13 @@ public class Probe
     }
 
     /// <summary>
-    /// Generates a default contactPlaneAxes array, with each contact given the same axis; { { 1, 0 }, { 0, 1 } }
+    /// Returns a default contactPlaneAxes array, with each contact given the same axis; { { 1, 0 }, { 0, 1 } }
     /// </summary>
-    /// <param name="numberOfContacts">Number of contacts in a single probe</param>
-    /// <returns></returns>
+    /// <remarks>
+    /// See Probeinterface documentation for more info.
+    /// </remarks>
+    /// <param name="numberOfContacts">Number of contacts in a single <see cref="Probe"/>.</param>
+    /// <returns>Three-dimensional array of <see cref="float"/>s.</returns>
     public static float[][][] DefaultContactPlaneAxes(int numberOfContacts)
     {
         float[][][] contactPlaneAxes = new float[numberOfContacts][][];
@@ -595,11 +642,11 @@ public class Probe
     }
 
     /// <summary>
-    /// Generates an array of contact shape parameters for the circle, based on the given number of contacts and the given radius
+    /// Returns an array of <see cref="ContactShapeParam"/>s for a <see cref="ContactShape.Circle"/>.
     /// </summary>
-    /// <param name="numberOfContacts">Number of contacts in a single probe</param>
-    /// <param name="radius">Radius of the contact, in the current probe units</param>
-    /// <returns></returns>
+    /// <param name="numberOfContacts">Number of contacts in a single <see cref="Probe"/>.</param>
+    /// <param name="radius">Radius of the contact, in units of <see cref="ProbeSiUnits"/>.</param>
+    /// <returns><see cref="ContactShapeParam"/> array.</returns>
     public static ContactShapeParam[] DefaultCircleParams(int numberOfContacts, float radius)
     {
         ContactShapeParam[] contactShapeParams = new ContactShapeParam[numberOfContacts];
@@ -613,11 +660,11 @@ public class Probe
     }
 
     /// <summary>
-    /// Generates an array of contact shape parameters for the square, based on the given number of contacts and the given width
+    /// Returns an array of <see cref="ContactShapeParam"/>s for a <see cref="ContactShape.Square"/>.
     /// </summary>
-    /// <param name="numberOfContacts">Number of contacts in a single probe</param>
-    /// <param name="width">Width of the contact, in the current probe units</param>
-    /// <returns></returns>
+    /// <param name="numberOfContacts">Number of contacts in a single <see cref="Probe"/>.</param>
+    /// <param name="width">Width of the contact, in units of <see cref="ProbeSiUnits"/>.</param>
+    /// <returns><see cref="ContactShapeParam"/> array.</returns>
     public static ContactShapeParam[] DefaultSquareParams(int numberOfContacts, float width)
     {
         ContactShapeParam[] contactShapeParams = new ContactShapeParam[numberOfContacts];
@@ -631,12 +678,12 @@ public class Probe
     }
 
     /// <summary>
-    /// Generates an array of contact shape parameters for the rectangle, based on the given number of contacts and the given width / height
+    /// Returns an array of <see cref="ContactShapeParam"/>s for a <see cref="ContactShape.Rect"/>.
     /// </summary>
-    /// <param name="numberOfContacts">Number of contacts in a single probe</param>
-    /// <param name="width">Width of the contact, in the current probe units</param>
-    /// <param name="height">Height of the contact, in the current probe units</param>
-    /// <returns></returns>
+    /// <param name="numberOfContacts">Number of contacts in a single <see cref="Probe"/>.</param>
+    /// <param name="width">Width of the contact, in units of <see cref="ProbeSiUnits"/>.</param>
+    /// <param name="height">Height of the contact, in units of <see cref="ProbeSiUnits"/>.</param>
+    /// <returns><see cref="ContactShapeParam"/> array.</returns>
     public static ContactShapeParam[] DefaultRectParams(int numberOfContacts, float width, float height)
     {
         ContactShapeParam[] contactShapeParams = new ContactShapeParam[numberOfContacts];
@@ -650,12 +697,11 @@ public class Probe
     }
 
     /// <summary>
-    /// Generates an array of sequential device channel indices, based on the number of contacts and the offset given.
-    /// Note that device channel indices must be unique across all probes.
+    /// Returns a default array of sequential <see cref="Probe.DeviceChannelIndices"/>.
     /// </summary>
-    /// <param name="numberOfContacts">Number of contacts in a single probe</param>
-    /// <param name="offset">The first value of the sequential device channel indices</param>
-    /// <returns></returns>
+    /// <param name="numberOfContacts">Number of contacts in a single <see cref="Probe"/>.</param>
+    /// <param name="offset">The first value of the <see cref="Probe.DeviceChannelIndices"/>.</param>
+    /// <returns>A serially increasing array of <see cref="Probe.DeviceChannelIndices"/>.</returns>
     public static int[] DefaultDeviceChannelIndices(int numberOfContacts, int offset)
     {
         int[] deviceChannelIndices = new int[numberOfContacts];
@@ -669,11 +715,10 @@ public class Probe
     }
 
     /// <summary>
-    /// Generates a sequential array of contact IDs based on the number of contacts.
-    /// Note that contact IDs do not need to be unique across probes.
+    /// Returns a sequential array of <see cref="Probe.ContactIds"/>.
     /// </summary>
-    /// <param name="numberOfContacts">Number of contacts in a single probe</param>
-    /// <returns></returns>
+    /// <param name="numberOfContacts">Number of contacts in a single <see cref="Probe"/>.</param>
+    /// <returns>Array of strings defining the <see cref="Probe.ContactIds"/>.</returns>
     public static string[] DefaultContactIds(int numberOfContacts)
     {
         string[] contactIds = new string[numberOfContacts];
@@ -687,10 +732,10 @@ public class Probe
     }
 
     /// <summary>
-    /// Generates an array of empty strings as the default shank ID
+    /// Returns an array of empty strings as the default shank ID.
     /// </summary>
-    /// <param name="numberOfContacts">Number of contacts in a single probe</param>
-    /// <returns></returns>
+    /// <param name="numberOfContacts">Number of contacts in a single <see cref="Probe"/>.</param>
+    /// <returns>Array of empty strings.</returns>
     public static string[] DefaultShankIds(int numberOfContacts)
     {
         string[] contactIds = new string[numberOfContacts];
@@ -704,11 +749,10 @@ public class Probe
     }
 
     /// <summary>
-    /// Returns a <see cref="Contact"/> object that contains the position, shape, shape params, and IDs (device / contact / shank)
-    /// for a single contact at the given index
+    /// Returns a <see cref="Contact"/> object.
     /// </summary>
-    /// <param name="index">Relative index of the contact in this Probe</param>
-    /// <returns></returns>
+    /// <param name="index">Relative index of the contact in this <see cref="Probe"/>.</param>
+    /// <returns><see cref="Contact"/>.</returns>
     public Contact GetContact(int index)
     {
         return new Contact(ContactPositions[index][0], ContactPositions[index][1], ContactShapes[index], ContactShapeParams[index],
@@ -716,7 +760,7 @@ public class Probe
     }
 
     /// <summary>
-    /// Number of contacts within this <see cref="Probe"/>.
+    /// Gets the number of contacts within this <see cref="Probe"/>.
     /// </summary>
     public int NumberOfContacts => ContactPositions.Length;
 }
@@ -728,13 +772,13 @@ public class Probe
 public enum ProbeNdim
 {
     /// <summary>
-    /// Two-dimensions
+    /// Two-dimensions.
     /// </summary>
     [EnumMemberAttribute(Value = "2")]
     Two = 2,
 
     /// <summary>
-    /// Three-dimensions
+    /// Three-dimensions.
     /// </summary>
     [EnumMemberAttribute(Value = "3")]
     Three = 3,
@@ -748,59 +792,65 @@ public enum ProbeNdim
 public enum ProbeSiUnits
 {
     /// <summary>
-    /// Millimeters [mm]
+    /// Millimeters [mm].
     /// </summary>
     [EnumMemberAttribute(Value = "mm")]
     mm = 0,
 
     /// <summary>
-    /// Micrometers [um]
+    /// Micrometers [um].
     /// </summary>
     [EnumMemberAttribute(Value = "um")]
     um = 1,
 }
 
 /// <summary>
-/// Struct that extends the Probe Interface specification by encapsulating all values for a single contact within
-/// a single struct.
+/// Struct that extends the Probeinterface specification by encapsulating all values for a single contact.
 /// </summary>
 public readonly struct Contact
 {
     /// <summary>
-    /// X-position of the contact
+    /// Gets the x-position of the contact.
     /// </summary>
     public float PosX { get; }
+
     /// <summary>
-    /// Y-position of the contact
+    /// Gets the y-position of the contact.
     /// </summary>
     public float PosY { get; }
+
     /// <summary>
-    /// Shape of the contact
+    /// Gets the <see cref="ContactShape"/> of the contact.
     /// </summary>
     public ContactShape Shape { get; }
+
     /// <summary>
-    /// Parameters of the shape of the contact
+    /// Gets the <see cref="ContactShapeParam"/>'s of the contact.
     /// </summary>
     public ContactShapeParam ShapeParams { get; }
+
     /// <summary>
-    /// Device channel index of the contact
+    /// Gets the device ID of the contact.
     /// </summary>
     public int DeviceId { get; }
+
     /// <summary>
-    /// Contact ID of the contact
+    /// Gets the contact ID of the contact.
     /// </summary>
     public string ContactId { get; }
+
     /// <summary>
-    /// Shank ID of the contact
+    /// Gets the shank ID of the contact.
     /// </summary>
     public string ShankId { get; }
+
     /// <summary>
-    /// Index of the contact within the <see cref="Probe"/> object variables.
+    /// Gets the index of the contact within the <see cref="Probe"/> object.
     /// </summary>
     public int Index { get; }
 
     /// <summary>
-    /// <see cref="Contact"/> constructor that initializes all data.
+    /// Initializes a new instance of the <see cref="Contact"/> struct.
     /// </summary>
     /// <param name="posX"></param>
     /// <param name="posY"></param>
@@ -825,8 +875,11 @@ public readonly struct Contact
 }
 
 /// <summary>
-/// Parameters used to draw the contact. Fields are nullable, since not all fields are required depending on the shape selected.
+/// Class holding parameters used to draw the contact.
 /// </summary>
+/// <remarks>
+/// Fields are nullable, since not all fields are required depending on the shape selected.
+/// </remarks>
 [GeneratedCodeAttribute("Bonsai.Sgen", "0.3.0.0 (Newtonsoft.Json v13.0.0.0)")]
 public class ContactShapeParam
 {
@@ -835,8 +888,11 @@ public class ContactShapeParam
     private float? _height;
 
     /// <summary>
-    /// Radius of the contact, only used to draw <see cref="ContactShape.Circle"/> contacts.
+    /// Gets the radius of the contact.
     /// </summary>
+    /// <remarks>
+    /// This is only used to draw <see cref="ContactShape.Circle"/> contacts. Field can be null.
+    /// </remarks>
     public float? Radius
     {
         get { return _radius; }
@@ -844,9 +900,12 @@ public class ContactShapeParam
     }
 
     /// <summary>
-    /// Width of the contact, used to draw <see cref="ContactShape.Square"/> or
-    /// <see cref="ContactShape.Rect"/> contacts.
+    /// Gets the width of the contact.
     /// </summary>
+    /// <remarks>
+    /// This is used to draw <see cref="ContactShape.Square"/> or <see cref="ContactShape.Rect"/> contacts.
+    /// Field can be null.
+    /// </remarks>
     public float? Width
     {
         get { return _width; }
@@ -854,8 +913,11 @@ public class ContactShapeParam
     }
 
     /// <summary>
-    /// Height of the contact, used to draw <see cref="ContactShape.Rect"/> contacts.
+    /// Gets the height of the contact.
     /// </summary>
+    /// <remarks>
+    /// This is only used to draw <see cref="ContactShape.Rect"/> contacts. Field can be null.
+    /// </remarks>
     public float? Height
     {
         get { return _height; }
@@ -863,11 +925,11 @@ public class ContactShapeParam
     }
 
     /// <summary>
-    /// Constructor, where all inputs are null by default. Inputs can be specified using <c>new ContactShapeParams(width: Width)</c>.
+    /// Initializes a new instance of the <see cref="ContactShapeParam"/> class.
     /// </summary>
-    /// <param name="radius"></param>
-    /// <param name="width"></param>
-    /// <param name="height"></param>
+    /// <param name="radius">Radius. Can be null.</param>
+    /// <param name="width">Width. Can be null.</param>
+    /// <param name="height">Height. Can be null.</param>
     [JsonConstructor]
     public ContactShapeParam(float? radius = null, float? width = null, float? height = null)
     {
@@ -889,33 +951,33 @@ public class ContactShapeParam
 }
 
 /// <summary>
-/// Shape of the contact
+/// Shape of the contact.
 /// </summary>
 [GeneratedCodeAttribute("Bonsai.Sgen", "0.3.0.0 (Newtonsoft.Json v13.0.0.0)")]
 [JsonConverter(typeof(StringEnumConverter))]
 public enum ContactShape
 {
     /// <summary>
-    /// Circle
+    /// Circle.
     /// </summary>
     [EnumMemberAttribute(Value = "circle")]
     Circle = 0,
 
     /// <summary>
-    /// Rectangle
+    /// Rectangle.
     /// </summary>
     [EnumMemberAttribute(Value = "rect")]
     Rect = 1,
 
     /// <summary>
-    /// Square
+    /// Square.
     /// </summary>
     [EnumMemberAttribute(Value = "square")]
     Square = 2,
 }
 
 /// <summary>
-/// Class holding the Probe annotations. Name and manufacturer of the probe are defined here.
+/// Class holding the <see cref="Probe"/> annotations.
 /// </summary>
 [GeneratedCodeAttribute("Bonsai.Sgen", "0.3.0.0 (Newtonsoft.Json v13.0.0.0)")]
 public class ProbeAnnotations
@@ -924,7 +986,7 @@ public class ProbeAnnotations
     private string _manufacturer;
 
     /// <summary>
-    /// Name of the probe as defined by the manufacturer, or a descriptive name such as the neurological target.
+    /// Gets the name of the probe as defined by the manufacturer, or a descriptive name such as the neurological target.
     /// </summary>
     [JsonProperty("name")]
     public string Name
@@ -934,7 +996,7 @@ public class ProbeAnnotations
     }
 
     /// <summary>
-    /// Name of the manufacturer who created the probe.
+    /// Gets the name of the manufacturer who created the probe.
     /// </summary>
     [JsonProperty("manufacturer")]
     public string Manufacturer
@@ -944,7 +1006,7 @@ public class ProbeAnnotations
     }
 
     /// <summary>
-    /// Constructor that instantiates with the name and manufacturer for the probe.
+    /// Initializes a new instance of the <see cref="ProbeAnnotations"/> class.
     /// </summary>
     /// <param name="name"></param>
     /// <param name="manufacturer"></param>
@@ -974,7 +1036,7 @@ public class ContactAnnotations
     private string[] _contactAnnotations;
 
     /// <summary>
-    /// Array of strings holding annotations for each contact. Not all indices must have annotations.
+    /// Gets the array of strings holding annotations for each contact. Not all indices must have annotations.
     /// </summary>
     public string[] Annotations
     {
@@ -983,7 +1045,7 @@ public class ContactAnnotations
     }
 
     /// <summary>
-    /// Constructor that initializes the contact annotations class.
+    /// Initializes a new instance of the <see cref="ContactAnnotations"/> class.
     /// </summary>
     /// <param name="contactAnnotations"></param>
     [JsonConstructor]
