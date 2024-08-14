@@ -52,7 +52,7 @@ namespace OpenEphys.ProbeInterface.NET
         /// <summary>
         /// Copy constructor given an existing <see cref="ContactShapeParam"/> object.
         /// </summary>
-        /// <param name="shape"></param>
+        /// <param name="shape">Existing <see cref="ContactShapeParam"/> object to be copied.</param>
         protected ContactShapeParam(ContactShapeParam shape)
         {
             Radius = shape.Radius;

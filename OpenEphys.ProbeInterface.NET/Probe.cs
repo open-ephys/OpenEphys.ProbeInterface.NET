@@ -113,18 +113,18 @@ namespace OpenEphys.ProbeInterface.NET
         /// <summary>
         /// Public constructor, defined as the default Json constructor.
         /// </summary>
-        /// <param name="ndim"></param>
-        /// <param name="si_units"></param>
-        /// <param name="annotations"></param>
-        /// <param name="contact_annotations"></param>
-        /// <param name="contact_positions"></param>
-        /// <param name="contact_plane_axes"></param>
-        /// <param name="contact_shapes"></param>
-        /// <param name="contact_shape_params"></param>
-        /// <param name="probe_planar_contour"></param>
-        /// <param name="device_channel_indices"></param>
-        /// <param name="contact_ids"></param>
-        /// <param name="shank_ids"></param>
+        /// <param name="ndim">Number of dimensions to use while plotting the contacts [<see cref="ProbeNdim.Two"/> or <see cref="ProbeNdim.Three"/>].</param>
+        /// <param name="si_units">Real-world units to use while plotting the contacts [<see cref="ProbeSiUnits.mm"/> or <see cref="ProbeSiUnits.um"/>].</param>
+        /// <param name="annotations">Annotations for the probe.</param>
+        /// <param name="contact_annotations">Annotations for each contact as an array of strings.</param>
+        /// <param name="contact_positions">Center position of each contact in a two-dimensional array of floats. For more info, see <see cref="ContactPositions"/>.</param>
+        /// <param name="contact_plane_axes">Plane axes of each contact in a three-dimensional array of floats. For more info, see <see cref="ContactPlaneAxes"/>.</param>
+        /// <param name="contact_shapes">Array of shapes for each contact.</param>
+        /// <param name="contact_shape_params">Array of shape parameters for the each contact.</param>
+        /// <param name="probe_planar_contour">Two-dimensional array of floats (X and Y positions) defining a closed shape for a probe contour.</param>
+        /// <param name="device_channel_indices">Array of integers containing the device channel indices for each contact. For more info, see <see cref="DeviceChannelIndices"/>.</param>
+        /// <param name="contact_ids">Array of strings containing the contact ID for each contact. For more info, see <see cref="ContactIds"/>.</param>
+        /// <param name="shank_ids">Array of strings containing the shank ID for each contact. For more info, see <see cref="ShankIds"/>.</param>
         [JsonConstructor]
         public Probe(ProbeNdim ndim, ProbeSiUnits si_units, ProbeAnnotations annotations, ContactAnnotations contact_annotations,
             float[][] contact_positions, float[][][] contact_plane_axes, ContactShape[] contact_shapes,
@@ -148,7 +148,7 @@ namespace OpenEphys.ProbeInterface.NET
         /// <summary>
         /// Copy constructor given an existing <see cref="Probe"/> object.
         /// </summary>
-        /// <param name="probe"></param>
+        /// <param name="probe">Existing <see cref="Probe"/> object to be copied.</param>
         protected Probe(Probe probe)
         {
             NumDimensions = probe.NumDimensions;
@@ -252,7 +252,7 @@ namespace OpenEphys.ProbeInterface.NET
 
             for (int i = 0; i < numberOfContacts; i++)
             {
-                contactShapeParams[i] = new ContactShapeParam(height: height);
+                contactShapeParams[i] = new ContactShapeParam(width: width, height: height);
             }
 
             return contactShapeParams;

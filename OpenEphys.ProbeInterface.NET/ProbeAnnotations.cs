@@ -22,8 +22,8 @@ namespace OpenEphys.ProbeInterface.NET
         /// <summary>
         /// Initializes a new instance of the <see cref="ProbeAnnotations"/> class.
         /// </summary>
-        /// <param name="name"></param>
-        /// <param name="manufacturer"></param>
+        /// <param name="name">String defining the name of the probe.</param>
+        /// <param name="manufacturer">String defining the manufacturer of the probe.</param>
         [JsonConstructor]
         public ProbeAnnotations(string name, string manufacturer)
         {
@@ -34,7 +34,7 @@ namespace OpenEphys.ProbeInterface.NET
         /// <summary>
         /// Copy constructor that copies data from an existing <see cref="ProbeAnnotations"/> object.
         /// </summary>
-        /// <param name="probeAnnotations"></param>
+        /// <param name="probeAnnotations">Existing <see cref="ProbeAnnotations"/> object, containing a <see cref="Name"/> and a <see cref="Manufacturer"/>.</param>
         protected ProbeAnnotations(ProbeAnnotations probeAnnotations)
         {
             Name = probeAnnotations.Name;
