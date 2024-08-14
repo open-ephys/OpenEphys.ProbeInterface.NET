@@ -1,15 +1,13 @@
 ﻿using System.Xml.Serialization;
-using System.CodeDom.Compiler;
 using Newtonsoft.Json;
 
-namespace OpenEphys.ProbeInterface
+namespace OpenEphys.ProbeInterface.NET
 {
     /// <summary>
     /// Class that implements the Probe Interface specification for a Probe.
     /// </summary>
     public class Probe
     {
-
         /// <summary>
         /// Gets the <see cref="ProbeNdim"/> to use while plotting the <see cref="Probe"/>.
         /// </summary>
@@ -35,7 +33,7 @@ namespace OpenEphys.ProbeInterface
         public ProbeAnnotations Annotations { get; protected set; }
 
         /// <summary>
-        /// Gets the <see cref="ProbeInterface.ContactAnnotations"/> for the <see cref="Probe"/>.
+        /// Gets the <see cref="ContactAnnotations.ContactAnnotations"/> for the <see cref="Probe"/>.
         /// </summary>
         /// <remarks>
         /// This field can be used for noting things like where it physically is within a specimen, or if it
@@ -63,7 +61,6 @@ namespace OpenEphys.ProbeInterface
         [JsonProperty("contact_plane_axes")]
         public float[][][] ContactPlaneAxes { get; protected set; }
 
-
         /// <summary>
         /// Gets the <see cref="ContactShape"/> for each contact.
         /// </summary>
@@ -83,7 +80,6 @@ namespace OpenEphys.ProbeInterface
         [XmlIgnore]
         [JsonProperty("contact_shape_params", Required = Required.Always)]
         public ContactShapeParam[] ContactShapeParams { get; protected set; }
-
 
         /// <summary>
         /// Gets the outline of the probe that represents the physical shape.
@@ -113,7 +109,6 @@ namespace OpenEphys.ProbeInterface
         [XmlIgnore]
         [JsonProperty("shank_ids")]
         public string[] ShankIds { get; internal set; }
-
 
         /// <summary>
         /// Public constructor, defined as the default Json constructor.
@@ -264,11 +259,11 @@ namespace OpenEphys.ProbeInterface
         }
 
         /// <summary>
-        /// Returns a default array of sequential <see cref="Probe.DeviceChannelIndices"/>.
+        /// Returns a default array of sequential <see cref="DeviceChannelIndices"/>.
         /// </summary>
         /// <param name="numberOfContacts">Number of contacts in a single <see cref="Probe"/>.</param>
-        /// <param name="offset">The first value of the <see cref="Probe.DeviceChannelIndices"/>.</param>
-        /// <returns>A serially increasing array of <see cref="Probe.DeviceChannelIndices"/>.</returns>
+        /// <param name="offset">The first value of the <see cref="DeviceChannelIndices"/>.</param>
+        /// <returns>A serially increasing array of <see cref="DeviceChannelIndices"/>.</returns>
         public static int[] DefaultDeviceChannelIndices(int numberOfContacts, int offset)
         {
             int[] deviceChannelIndices = new int[numberOfContacts];
@@ -282,10 +277,10 @@ namespace OpenEphys.ProbeInterface
         }
 
         /// <summary>
-        /// Returns a sequential array of <see cref="Probe.ContactIds"/>.
+        /// Returns a sequential array of <see cref="ContactIds"/>.
         /// </summary>
         /// <param name="numberOfContacts">Number of contacts in a single <see cref="Probe"/>.</param>
-        /// <returns>Array of strings defining the <see cref="Probe.ContactIds"/>.</returns>
+        /// <returns>Array of strings defining the <see cref="ContactIds"/>.</returns>
         public static string[] DefaultContactIds(int numberOfContacts)
         {
             string[] contactIds = new string[numberOfContacts];

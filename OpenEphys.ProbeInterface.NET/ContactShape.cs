@@ -2,7 +2,7 @@
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 
-namespace OpenEphys.ProbeInterface
+namespace OpenEphys.ProbeInterface.NET
 {
     /// <summary>
     /// Shape of the contact.

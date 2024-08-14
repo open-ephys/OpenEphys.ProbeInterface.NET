@@ -1,6 +1,6 @@
 ﻿using System.Runtime.Serialization;
 
-namespace OpenEphys.ProbeInterface
+namespace OpenEphys.ProbeInterface.NET
 {
     /// <summary>
     /// Number of dimensions to use while plotting a <see cref="Probe"/>.

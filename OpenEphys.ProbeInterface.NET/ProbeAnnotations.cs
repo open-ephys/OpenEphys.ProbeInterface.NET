@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json;
 
-namespace OpenEphys.ProbeInterface
+namespace OpenEphys.ProbeInterface.NET
 {
     /// <summary>
     /// Class holding the <see cref="Probe"/> annotations.

@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json;
 
-namespace OpenEphys.ProbeInterface
+namespace OpenEphys.ProbeInterface.NET
 {
     /// <summary>
     /// Class holding all of the annotations for each contact.

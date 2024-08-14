@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json;
 
-namespace OpenEphys.ProbeInterface
+namespace OpenEphys.ProbeInterface.NET
 {
     /// <summary>
     /// Class holding parameters used to draw the contact.

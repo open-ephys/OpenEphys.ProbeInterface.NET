@@ -1,4 +1,4 @@
-﻿namespace OpenEphys.ProbeInterface
+﻿namespace OpenEphys.ProbeInterface.NET
 {
     /// <summary>
     /// Struct that extends the Probeinterface specification by encapsulating all values for a single contact.

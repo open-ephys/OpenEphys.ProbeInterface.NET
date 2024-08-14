@@ -4,15 +4,13 @@ using System.Xml.Serialization;
 using Newtonsoft.Json;
 using System;
 
-namespace OpenEphys.ProbeInterface
+namespace OpenEphys.ProbeInterface.NET
 {
     /// <summary>
     /// Abstract class that implements the Probeinterface specification in C# for .NET.
     /// </summary>
     public abstract class ProbeGroup
     {
-        //private IEnumerable<Probe> Probes;
-
         /// <summary>
         /// Gets the string defining the specification of the file.
         /// </summary>
@@ -41,7 +39,6 @@ namespace OpenEphys.ProbeInterface
         [XmlIgnore]
         [JsonProperty("probes", Required = Required.Always)]
         public IEnumerable<Probe> Probes { get; protected set; }
-
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ProbeGroup"/> class.
@@ -79,7 +76,6 @@ namespace OpenEphys.ProbeInterface
         /// Gets the number of contacts across all <see cref="Probe"/> objects.
         /// </summary>
         public int NumberOfContacts => Probes.Aggregate(0, (total, next) => total + next.NumberOfContacts);
-
 
         /// <summary>
         /// Returns the <see cref="Probe.ContactIds"/>'s of all contacts in all probes.
