@@ -13,7 +13,7 @@ namespace OpenEphys.ProbeInterface.NET
         /// </summary>
         [XmlIgnore]
         [JsonProperty("ndim", Required = Required.Always)]
-        public ProbeNdim NumDimensions {  get; protected set; }
+        public ProbeNdim NumDimensions { get; protected set; }
 
         /// <summary>
         /// Gets the <see cref="ProbeSiUnits"/> to use while plotting the <see cref="Probe"/>.
@@ -149,7 +149,7 @@ namespace OpenEphys.ProbeInterface.NET
         /// Copy constructor given an existing <see cref="Probe"/> object.
         /// </summary>
         /// <param name="probe">Existing <see cref="Probe"/> object to be copied.</param>
-        protected Probe(Probe probe)
+        public Probe(Probe probe)
         {
             NumDimensions = probe.NumDimensions;
             SiUnits = probe.SiUnits;
@@ -324,6 +324,7 @@ namespace OpenEphys.ProbeInterface.NET
         /// <summary>
         /// Gets the number of contacts within this <see cref="Probe"/>.
         /// </summary>
+        [JsonIgnore]
         public int NumberOfContacts => ContactPositions.Length;
     }
 }

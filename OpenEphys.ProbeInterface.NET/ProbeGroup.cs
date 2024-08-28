@@ -75,6 +75,7 @@ namespace OpenEphys.ProbeInterface.NET
         /// <summary>
         /// Gets the number of contacts across all <see cref="Probe"/> objects.
         /// </summary>
+        [JsonIgnore]
         public int NumberOfContacts => Probes.Aggregate(0, (total, next) => total + next.NumberOfContacts);
 
         /// <summary>
