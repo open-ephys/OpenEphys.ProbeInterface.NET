@@ -16,6 +16,7 @@ namespace OpenEphys.ProbeInterface.NET
         /// <remarks>
         /// This is only used to draw <see cref="ContactShape.Circle"/> contacts. Field can be null.
         /// </remarks>
+        [JsonProperty("radius")]
         public float? Radius { get; protected set; }
 
         /// <summary>
@@ -25,6 +26,7 @@ namespace OpenEphys.ProbeInterface.NET
         /// This is used to draw <see cref="ContactShape.Square"/> or <see cref="ContactShape.Rect"/> contacts.
         /// Field can be null.
         /// </remarks>
+        [JsonProperty("width")]
         public float? Width { get; protected set; }
 
         /// <summary>
@@ -33,6 +35,7 @@ namespace OpenEphys.ProbeInterface.NET
         /// <remarks>
         /// This is only used to draw <see cref="ContactShape.Rect"/> contacts. Field can be null.
         /// </remarks>
+        [JsonProperty("height")]
         public float? Height { get; protected set; }
 
         /// <summary>
